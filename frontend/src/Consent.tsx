@@ -16,6 +16,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 function Consent() {
     const isValidated = useSessionCheck();
+    const [loginId] = useLocalStorage('loginId', '');
+    const [password] = useLocalStorage('password', '');
     const [, setHasConsented] = useLocalStorage('has_consented', false);
     const [isCheckboxChecked, setIsCheckboxChecked] = useState(false);
     const [fullName, setFullName] = useState('');
@@ -46,8 +48,17 @@ function Consent() {
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (isCheckboxChecked && fullName.trim() !== '') {
+            try {
+                await fetch('/api/v1/user/consent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login_id: loginId, password })
+                });
+            } catch (e) {
+                console.error(e);
+            }
             setHasConsented(true);
             navigate('/sample');
         }

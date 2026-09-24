@@ -9,10 +9,9 @@ from hazy_oracles_user_study.database import (
 )
 from hazy_oracles_user_study.user_utils import add_user
 from hazy_oracles_user_study.sample_utils import add_root
+from hazy_oracles_user_study.definitions import ROOTS_PATH
 
 TEST_USER_DEFINITIONS = [{ "unique_id": f"uuid_{i}", "login_id": f"user{i}", "password": f"pw{i}"} for i in range(64)]
-
-ROOTS_PATH = Path(__file__).parent.parent / "data" / "conversation_roots"
 
 @pytest.fixture(name="session", scope="class")
 def session_fixture():

@@ -316,7 +316,7 @@ def select_sample_for_participant(db: Session, node_code_expansion_order: list[s
             task_role = "question_answerer",
             multimodal_input = MultimodalInputImage(
                 type = "image",
-                url = "TEST"
+                url = f"/api/v1/images?id={selected_root_id}"
             ),
             ambiguous_question = root_ambiguous_question,
             intended_question = root_unambiguous_question,
@@ -328,7 +328,7 @@ def select_sample_for_participant(db: Session, node_code_expansion_order: list[s
             task_role = "question_asker",
             multimodal_input = MultimodalInputImage(
                 type = "image",
-                url = "TEST"
+                url = f"/api/v1/images?id={selected_root_id}"
             ),
             ambiguous_question = root_ambiguous_question,
             dialog_history = dialog_history

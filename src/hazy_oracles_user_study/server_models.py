@@ -14,6 +14,8 @@ class SuccessResponse(BaseModel):
 # 1. /api/v1/user/create
 class UserCreateRequest(BaseModel):
     api_key: str
+    login_id: Optional[str] = None
+    password: Optional[str] = None
 
 class UserCreateData(BaseModel):
     login_id: str

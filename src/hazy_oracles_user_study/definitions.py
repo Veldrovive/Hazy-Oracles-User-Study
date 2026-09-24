@@ -1,9 +1,11 @@
 from dotenv import load_dotenv
 import os
 import pickle
+from pathlib import Path
 load_dotenv()
 
 API_KEY = os.getenv("API_KEY")
+ROOTS_PATH = Path(__file__).parent.parent.parent / os.getenv("ROOTS_PATH", "data/conversation_roots")
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./database.db")
 
 MAX_RESPONSES_FOR_ANSWERER_NODE = int(os.getenv("MAX_RESPONSES_FOR_ANSWERER_NODE", 5))
@@ -47,3 +49,4 @@ print(f"Default Zipf s: {DEFAULT_ZIPF_S}")
 print(f"Automod toxicity threshold: {AUTOMOD_TOXICITY_THRESHOLD}")
 print(f"Automod severe toxicity threshold: {AUTOMOD_SEVERE_TOXICITY_THRESHOLD}")
 print(f"Expansion order: {EXPANSION_ORDER_BASE64}")
+print(f"Roots path: {ROOTS_PATH}")

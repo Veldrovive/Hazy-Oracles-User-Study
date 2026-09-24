@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import {
     MainContainer,
@@ -24,6 +24,7 @@ export interface AgentChatProps {
 export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstResponseRef, lastResponseRef, loading }: AgentChatProps) {
 
     useEffect(() => {
+        console.log("ImageSrc", imageSrc);
         const lastMessageContainer = document.getElementById("last-message");
         if (lastMessageContainer) {
             lastResponseRef.current = lastMessageContainer.children[0];
@@ -74,7 +75,7 @@ export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstR
                                     </Message>
                                 }
                             </MessageList>
-                            <MessageInput attachButton={false} placeholder="Type message here" onSend={onSend} disabled={loading} />
+                            <MessageInput autoFocus attachButton={false} placeholder="Type message here" onSend={onSend} disabled={loading} />
                         </ChatContainer>
                     </MainContainer>
                 </div>

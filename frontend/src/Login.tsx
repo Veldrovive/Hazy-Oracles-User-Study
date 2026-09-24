@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Box, Typography, TextField, Button, Container, Link, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, TextField, Button, Container, Link, Alert, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { isLoginValid } from './utils'
 
 import { useLocalStorage } from 'usehooks-ts'
+
+declare const __DEV_API_KEY__: string | undefined;
 
 function Login() {
     const [currentLoginId, setCurrentLoginId] = useState('');
@@ -11,9 +13,42 @@ function Login() {
     const [currentError, setCurrentError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const [savedLoginId, setSavedLoginId] = useLocalStorage('loginId', '')
-    const [savedPassword, setSavedPassword] = useLocalStorage('password', '')
-    const [hasCompletedConsent, setHasCompletedConsent] = useLocalStorage('has_consented', false)
+    // Dev create user state
+    const [createModalOpen, setCreateModalOpen] = useState(false);
+    const [createUsername, setCreateUsername] = useState('');
+    const [createPassword, setCreatePassword] = useState('');
+    const [createApiKey, setCreateApiKey] = useState(typeof __DEV_API_KEY__ !== 'undefined' ? __DEV_API_KEY__ : '');
+    const [createStatus, setCreateStatus] = useState('');
+    const [isCreating, setIsCreating] = useState(false);
+
+    const handleCreateUser = async () => {
+        setIsCreating(true);
+        setCreateStatus('');
+        try {
+            const res = await fetch('/api/v1/user/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    api_key: createApiKey,
+                    login_id: createUsername || undefined,
+                    password: createPassword || undefined,
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setCreateStatus('User created successfully');
+            } else {
+                setCreateStatus(`Error: ${data.detail?.message || 'Unknown error'}`);
+            }
+        } catch (e) {
+            setCreateStatus('Failed to create user');
+        }
+        setIsCreating(false);
+    };
+
+    const [, setSavedLoginId] = useLocalStorage('loginId', '')
+    const [, setSavedPassword] = useLocalStorage('password', '')
+    const [, setHasCompletedConsent] = useLocalStorage('has_consented', false)
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -29,10 +64,26 @@ function Login() {
             setSavedLoginId(currentLoginId)
             setSavedPassword(currentPassword)
 
-            if (hasCompletedConsent) {
-                navigate('/sample');
-            } else {
-                navigate('/consent');
+            try {
+                const summaryRes = await fetch('/api/v1/user/summary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login_id: currentLoginId, password: currentPassword })
+                });
+                if (summaryRes.ok) {
+                    const summaryData = await summaryRes.json();
+                    if (summaryData.data.has_consented) {
+                        setHasCompletedConsent(true);
+                        navigate('/sample');
+                    } else {
+                        setHasCompletedConsent(false);
+                        navigate('/consent');
+                    }
+                } else {
+                    setCurrentError('Failed to fetch user summary');
+                }
+            } catch (e) {
+                setCurrentError('Failed to fetch user summary');
             }
         } else {
             setCurrentError('Invalid login credentials');
@@ -91,7 +142,18 @@ function Login() {
                         fullWidth
                         disabled={isLoading}
                     />
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        {import.meta.env.DEV ? (
+                            <Button
+                                variant="text"
+                                onClick={() => setCreateModalOpen(true)}
+                                sx={{ textTransform: 'none', color: 'text.secondary' }}
+                            >
+                                Dev: Create User
+                            </Button>
+                        ) : (
+                            <Box />
+                        )}
                         <Button
                             variant="contained"
                             onClick={handleLogin}
@@ -122,9 +184,56 @@ function Login() {
                 </Box>
             </Box>
 
-            <Typography variant="body1" color="text.secondary" align="center" mt="auto">
+            <Typography variant="body1" color="text.secondary" align="center" sx={{ mt: 'auto' }}>
                 For questions contact: <Link href="mailto:adempst@umich.edu" color="inherit">adempst@umich.edu</Link>
             </Typography>
+
+            {import.meta.env.DEV && (
+                <Dialog open={createModalOpen} onClose={() => setCreateModalOpen(false)}>
+                    <DialogTitle>Create Dev User</DialogTitle>
+                    <DialogContent>
+                        {createStatus && (
+                            <Alert severity={createStatus.startsWith('Error') || createStatus.startsWith('Failed') ? 'error' : 'success'} sx={{ mb: 2, mt: 1 }}>
+                                {createStatus}
+                            </Alert>
+                        )}
+                        <TextField
+                            label="Username (Login ID)"
+                            variant="outlined"
+                            value={createUsername}
+                            onChange={(e) => setCreateUsername(e.target.value)}
+                            fullWidth
+                            margin="normal"
+                            disabled={isCreating}
+                        />
+                        <TextField
+                            label="Password"
+                            variant="outlined"
+                            value={createPassword}
+                            onChange={(e) => setCreatePassword(e.target.value)}
+                            fullWidth
+                            margin="normal"
+                            disabled={isCreating}
+                        />
+                        <TextField
+                            label="API Key"
+                            variant="outlined"
+                            value={createApiKey}
+                            onChange={(e) => setCreateApiKey(e.target.value)}
+                            fullWidth
+                            margin="normal"
+                            type="password"
+                            disabled={isCreating}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setCreateModalOpen(false)} disabled={isCreating}>Cancel</Button>
+                        <Button onClick={handleCreateUser} disabled={isCreating} variant="contained" disableElevation sx={{ bgcolor: '#e6dbf9', color: '#000', '&:hover': { bgcolor: '#d5c4f5' } }}>
+                            {isCreating ? <CircularProgress size={24} color="inherit" /> : 'Create'}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            )}
         </Container>
     );
 }

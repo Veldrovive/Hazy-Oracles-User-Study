@@ -1,10 +1,7 @@
 function isLoginValid(username: string, password: string): Promise<boolean> {
-    // Dummy web request function
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(username === 'aidan'); // Always assume valid for now
-        }, 500);
-    });
+    return fetch(`/api/v1/user/login?login_id=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
+        .then(res => res.ok)
+        .catch(() => false);
 }
 
 export default isLoginValid;

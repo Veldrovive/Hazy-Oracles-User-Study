@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, CircularProgress, Alert } from '@mui/material';
-import { useSessionCheck } from './utils';
+import { Box, CircularProgress, Alert, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Slider } from '@mui/material';
+
 import { TaskInstructions } from './components/TaskInstructions';
 import { TargetQuestion } from './components/TargetQuestion';
 import { RatingForm } from './components/RatingForm';
 import { AgentChat } from './components/AgentChat';
-import Xarrow, { useXarrow } from "react-xarrows";
+import Xarrow from "react-xarrows";
 import {
     QUESTION_ANSWERER_INSTRUCTIONS,
     QUESTION_ANSWERER_DETAILED_INSTRUCTIONS_TITLE,
@@ -13,19 +13,17 @@ import {
     QUESTION_ASKER_INSTRUCTIONS,
     QUESTION_ASKER_DETAILED_INSTRUCTIONS_TITLE,
     QUESTION_ASKER_DETAILED_INSTRUCTIONS_CONTENT,
-    EXAMPLE_IMAGE_URL,
-    EXAMPLE_TARGET_QUESTION,
     QUESTION_ANSWERER_RATING_QUESTIONS,
-    QUESTION_ASKER_RATING_QUESTIONS,
-    EXAMPLE_CHAT_MESSAGES
+    QUESTION_ASKER_RATING_QUESTIONS
 } from './sampleData';
-import { useBoolean } from 'usehooks-ts';
+import { useBoolean, useLocalStorage } from 'usehooks-ts';
+import { useNavigate } from 'react-router-dom';
 
 // -------------------
 
 export interface MultimodalInput {
     type: 'image' | 'text',
-    content: string  // Could be text or a url
+    content: string
 }
 
 export interface DialogMessage {
@@ -48,33 +46,81 @@ export interface SampleDataResponse {
 }
 
 function SampleWrapper() {
-    const isValidated = useSessionCheck();
-    const testSample: SampleData = {
-        sample_id: "test",
-        task_role: "question_answerer",
-        multimodal_input: {
-            type: "image",
-            content: EXAMPLE_IMAGE_URL
-        },
-        ambiguous_question: "Where is the large white item?",
-        intended_question: EXAMPLE_TARGET_QUESTION,
-        dialog_history: [
-            {
-                role: "question_asker",
-                text: "Which specific white item are you looking for?"
-            },
-            {
-                role: "question_answerer",
-                text: "The large one next to the car."
-            },
-            {
-                role: "question_asker",
-                text: "Are you referring to the zebra?"
-            }
-        ]
-    }
+    const [loginId, setLoginId] = useLocalStorage('loginId', '');
+    const [password, setPassword] = useLocalStorage('password', '');
+    const [, setHasConsented] = useLocalStorage('has_consented', false);
+    const navigate = useNavigate();
 
-    if (!isValidated) {
+    const [sampleData, setSampleData] = useState<SampleData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [noSampleReason, setNoSampleReason] = useState<string | null>(null);
+
+    const [hasReadAsker, setHasReadAsker] = useState(true);
+    const [hasReadAnswerer, setHasReadAnswerer] = useState(true);
+
+    useEffect(() => {
+        let isMounted = true;
+        const load = async () => {
+            if (!loginId || !password) {
+                navigate('/?message=' + encodeURIComponent('Please enter your login id and password again'));
+                return;
+            }
+
+            try {
+                const summaryRes = await fetch('/api/v1/user/summary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login_id: loginId, password })
+                });
+
+                if (!summaryRes.ok) {
+                    setLoginId('');
+                    setPassword('');
+                    setHasConsented(false);
+                    navigate('/?message=' + encodeURIComponent('Please enter your login id and password again'));
+                    return;
+                }
+
+                const summaryData = await summaryRes.json();
+                if (!summaryData.data.has_consented) {
+                    navigate('/consent');
+                    return;
+                }
+
+                if (!isMounted) return;
+                setHasReadAsker(summaryData.data.has_read_asker_instructions);
+                setHasReadAnswerer(summaryData.data.has_read_answerer_instructions);
+
+                const sampleRes = await fetch('/api/v1/task/sample', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login_id: loginId, password })
+                });
+
+                const sampleResData = await sampleRes.json();
+
+                if (!isMounted) return;
+
+                if (sampleResData.status === 'no_sample') {
+                    setNoSampleReason(sampleResData.message || 'No samples available at this time.');
+                    setIsLoading(false);
+                    return;
+                }
+
+                if (sampleResData.status === 'success') {
+                    setSampleData(sampleResData.data);
+                    setIsLoading(false);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        load();
+        return () => { isMounted = false; };
+    }, [loginId, password, navigate, setLoginId, setPassword, setHasConsented]);
+
+    if (isLoading) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
                 <CircularProgress />
@@ -82,24 +128,80 @@ function SampleWrapper() {
         );
     }
 
+    if (noSampleReason) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
+                <Typography variant="h5" gutterBottom>Check back later</Typography>
+                <Typography>{noSampleReason}</Typography>
+            </Box>
+        )
+    }
+
+    if (!sampleData) return null;
+
     return (
-        <Sample {...testSample} isValidated={isValidated} />
+        <Sample
+            {...sampleData}
+            isValidated={true}
+            hasReadAsker={hasReadAsker}
+            hasReadAnswerer={hasReadAnswerer}
+            loginId={loginId}
+            password={password}
+            setHasReadAsker={setHasReadAsker}
+            setHasReadAnswerer={setHasReadAnswerer}
+        />
     )
 }
 
-function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, intended_question, dialog_history, isValidated }: SampleData & { isValidated: boolean }) {
+type SampleProps = SampleData & {
+    isValidated: boolean,
+    hasReadAsker: boolean,
+    hasReadAnswerer: boolean,
+    loginId: string,
+    password: string,
+    setHasReadAsker: (val: boolean) => void,
+    setHasReadAnswerer: (val: boolean) => void
+};
+
+function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, intended_question, dialog_history, isValidated, hasReadAsker, hasReadAnswerer, loginId, password, setHasReadAsker, setHasReadAnswerer }: SampleProps) {
     const [ratings, setRatings] = useState<Record<string, number>>({});
+    const [currentGuess, setCurrentGuess] = useState("");
+    const [confidenceScore, setConfidenceScore] = useState<number>(3);
 
     const [currentErrorAlert, setCurrentErrorAlert] = useState<string | undefined>();
 
     const { value: isSendingResponse, setTrue: setIsSendingResponseTrue, setFalse: setIsSendingResponseFalse } = useBoolean(false)
 
-    const ratingBoxRef = useRef(null);
-    const lastResponseRef = useRef(null);
-    const firstResponseRef = useRef(null);
+    const ratingBoxRef = useRef<any>(null);
+    const lastResponseRef = useRef<any>(null);
+    const firstResponseRef = useRef<any>(null);
 
     const [isIntendedQuestionhovered, setIsIntendedQuestionHovered] = useState(false);
     const [showXarrow, setShowXarrow] = useState(false);
+
+    const [showInstructionsModal, setShowInstructionsModal] = useState(
+        (task_role === 'question_asker' && !hasReadAsker) ||
+        (task_role === 'question_answerer' && !hasReadAnswerer)
+    );
+
+    const handleReadInstructions = async () => {
+        const endpoint = task_role === 'question_asker' ? '/api/v1/user/read_asker_instructions' : '/api/v1/user/read_answerer_instructions';
+        try {
+            await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login_id: loginId, password })
+            });
+            if (task_role === 'question_asker') {
+                setHasReadAsker(true);
+            } else {
+                setHasReadAnswerer(true);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+        setShowInstructionsModal(false);
+    };
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -162,15 +264,87 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
             setCurrentErrorAlert('Login not validated. Please wait a moment and retry.');
             return;
         }
+
+        if (task_role === 'question_answerer') {
+            if (!ratings['relevance'] || !ratings['informativeness']) {
+                setCurrentErrorAlert('Please fill out all ratings before sending.');
+                return;
+            }
+        } else if (task_role === 'question_asker') {
+            if (!ratings['helpfulness']) {
+                setCurrentErrorAlert('Please fill out the helpfulness rating before sending.');
+                return;
+            }
+            if (!currentGuess.trim()) {
+                setCurrentErrorAlert('Please enter your current guess.');
+                return;
+            }
+        }
+
+        setCurrentErrorAlert(undefined);
         setIsSendingResponseTrue();
         console.log("Sending response:", res);
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setIsSendingResponseFalse();
-        console.log("Sent response")
+
+        let response_data: any = {};
+        if (task_role === 'question_asker') {
+            response_data = {
+                response_type: 'question_asker',
+                previous_answer_meaningful_score: ratings['helpfulness'],
+                current_guess: currentGuess,
+                confidence_score: confidenceScore,
+                next_question: res
+            };
+        } else {
+            response_data = {
+                response_type: 'question_answerer',
+                previous_question_relevant_score: ratings['relevance'],
+                previous_question_informative_score: ratings['informativeness'],
+                answer: res
+            };
+        }
+
+        try {
+            const apiRes = await fetch('/api/v1/task/response', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    login_id: loginId,
+                    password: password,
+                    sample_id: sample_id,
+                    response_data: response_data
+                })
+            });
+
+            if (!apiRes.ok) {
+                const errData = await apiRes.json();
+                setCurrentErrorAlert(errData.detail?.message || 'Error submitting response.');
+                setIsSendingResponseFalse();
+                return;
+            }
+
+            console.log("Sent response successfully");
+            window.location.reload(); 
+        } catch (e: any) {
+            console.error(e);
+            setCurrentErrorAlert(e.message || 'An unexpected error occurred.');
+            setIsSendingResponseFalse();
+        }
     }
 
     return (
         <>
+            <Dialog open={showInstructionsModal} onClose={() => { }} maxWidth="md" fullWidth>
+                <DialogTitle>{detailed_instructions_title}</DialogTitle>
+                <DialogContent>
+                    <Box sx={{ whiteSpace: 'pre-wrap', pt: 1 }}>{detailed_instructions_content}</Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleReadInstructions} variant="contained" color="primary">
+                        I have read the instructions
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             {showXarrow && (
                 <Xarrow
                     start='rating-box'
@@ -223,12 +397,44 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                         }
 
                         <RatingForm
-                            title="Rate the previous clarifying question"
+                            title={task_role === 'question_asker' ? "Rate the previous answer" : "Rate the previous clarifying question"}
                             questions={rating_questions}
                             values={ratings}
                             onChange={handleRatingChange}
                             boxRef={ratingBoxRef}
                         />
+
+                        {
+                            task_role === 'question_asker' && (
+                                <Box sx={{ mt: 2, p: 2, bgcolor: 'white', borderRadius: 1, border: '1px solid #e0e0e0', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                                    <Typography variant="h6" gutterBottom>
+                                        Current Guess
+                                    </Typography>
+                                    <TextField 
+                                        fullWidth 
+                                        size="small"
+                                        label="What is your guess for the intended question?" 
+                                        value={currentGuess} 
+                                        onChange={(e) => setCurrentGuess(e.target.value)} 
+                                        sx={{ mb: 2 }}
+                                    />
+                                    <Typography variant="body1" gutterBottom>
+                                        Confidence Score
+                                    </Typography>
+                                    <Box sx={{ px: 2 }}>
+                                        <Slider
+                                            value={confidenceScore}
+                                            min={1}
+                                            max={5}
+                                            step={1}
+                                            marks
+                                            onChange={(_, newValue) => setConfidenceScore(newValue as number)}
+                                            valueLabelDisplay="auto"
+                                        />
+                                    </Box>
+                                </Box>
+                            )
+                        }
                     </Box>
                 </Box>
                 <Box sx={{
@@ -241,7 +447,7 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                     overflow: 'hidden' // For rounded corners
                 }}>
                     <AgentChat
-                        imageSrc={multimodal_input.type === 'image' ? multimodal_input.content : ''}
+                        imageSrc={multimodal_input.type === 'image' ? multimodal_input.url : ''}
                         imageSide={task_role === 'question_asker' ? 'incoming' : 'outgoing'}
                         initialMessages={chatHistory}
                         onSend={handleSend}
