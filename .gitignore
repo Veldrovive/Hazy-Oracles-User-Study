@@ -1,6 +1,7 @@
 /tasks/
 .env
 /data
+*.db
 
 # Python-generated files
 __pycache__/

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, CircularProgress, Alert, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Slider } from '@mui/material';
-
+import { Box, CircularProgress, Alert, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Slider, Tooltip, IconButton } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import { TaskInstructions } from './components/TaskInstructions';
 import { TargetQuestion } from './components/TargetQuestion';
 import { RatingForm } from './components/RatingForm';
@@ -139,6 +139,13 @@ function SampleWrapper() {
 
     if (!sampleData) return null;
 
+    const handleLogout = () => {
+        setLoginId('');
+        setPassword('');
+        setHasConsented(false);
+        navigate('/');
+    };
+
     return (
         <Sample
             {...sampleData}
@@ -149,6 +156,7 @@ function SampleWrapper() {
             password={password}
             setHasReadAsker={setHasReadAsker}
             setHasReadAnswerer={setHasReadAnswerer}
+            handleLogout={handleLogout}
         />
     )
 }
@@ -160,10 +168,11 @@ type SampleProps = SampleData & {
     loginId: string,
     password: string,
     setHasReadAsker: (val: boolean) => void,
-    setHasReadAnswerer: (val: boolean) => void
+    setHasReadAnswerer: (val: boolean) => void,
+    handleLogout: () => void
 };
 
-function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, intended_question, dialog_history, isValidated, hasReadAsker, hasReadAnswerer, loginId, password, setHasReadAsker, setHasReadAnswerer }: SampleProps) {
+function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, intended_question, dialog_history, isValidated, hasReadAsker, hasReadAnswerer, loginId, password, setHasReadAsker, setHasReadAnswerer, handleLogout }: SampleProps) {
     const [ratings, setRatings] = useState<Record<string, number>>({});
     const [currentGuess, setCurrentGuess] = useState("");
     const [confidenceScore, setConfidenceScore] = useState<number>(3);
@@ -259,25 +268,25 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
         setRatings(prev => ({ ...prev, [id]: value }));
     };
 
-    const handleSend = async (res: string) => {
+    const handleSend = async (res: string): Promise<boolean> => {
         if (!isValidated) {
             setCurrentErrorAlert('Login not validated. Please wait a moment and retry.');
-            return;
+            return false;
         }
 
         if (task_role === 'question_answerer') {
             if (!ratings['relevance'] || !ratings['informativeness']) {
                 setCurrentErrorAlert('Please fill out all ratings before sending.');
-                return;
+                return false;
             }
         } else if (task_role === 'question_asker') {
             if (!ratings['helpfulness']) {
                 setCurrentErrorAlert('Please fill out the helpfulness rating before sending.');
-                return;
+                return false;
             }
             if (!currentGuess.trim()) {
                 setCurrentErrorAlert('Please enter your current guess.');
-                return;
+                return false;
             }
         }
 
@@ -319,15 +328,17 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                 const errData = await apiRes.json();
                 setCurrentErrorAlert(errData.detail?.message || 'Error submitting response.');
                 setIsSendingResponseFalse();
-                return;
+                return false;
             }
 
             console.log("Sent response successfully");
             window.location.reload(); 
+            return true;
         } catch (e: any) {
             console.error(e);
             setCurrentErrorAlert(e.message || 'An unexpected error occurred.');
             setIsSendingResponseFalse();
+            return false;
         }
     }
 
@@ -418,23 +429,54 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                                         onChange={(e) => setCurrentGuess(e.target.value)} 
                                         sx={{ mb: 2 }}
                                     />
-                                    <Typography variant="body1" gutterBottom>
-                                        Confidence Score
-                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                        <Typography variant="body1">
+                                            Confidence Score (1-5)
+                                        </Typography>
+                                        <Tooltip title="How confident are you that your current guess is the intended question?" placement="right">
+                                            <IconButton size="small" sx={{ ml: 1, color: 'action.active' }}>
+                                                <InfoIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Box>
                                     <Box sx={{ px: 2 }}>
                                         <Slider
                                             value={confidenceScore}
                                             min={1}
                                             max={5}
                                             step={1}
-                                            marks
+                                            marks={[
+                                                { value: 1, label: '1' },
+                                                { value: 2, label: '2' },
+                                                { value: 3, label: '3' },
+                                                { value: 4, label: '4' },
+                                                { value: 5, label: '5' },
+                                            ]}
                                             onChange={(_, newValue) => setConfidenceScore(newValue as number)}
                                             valueLabelDisplay="auto"
+                                            valueLabelFormat={(value) => {
+                                                const labels: Record<number, string> = {
+                                                    1: 'Not at all confident',
+                                                    2: 'Not very confident',
+                                                    3: 'Neutral',
+                                                    4: 'Very confident',
+                                                    5: 'Perfectly confident'
+                                                };
+                                                return labels[value] || value.toString();
+                                            }}
                                         />
                                     </Box>
                                 </Box>
                             )
                         }
+                        <Button 
+                            variant="outlined" 
+                            color="error" 
+                            onClick={handleLogout} 
+                            sx={{ mt: 2 }}
+                        >
+                            Log Out
+                        </Button>
                     </Box>
                 </Box>
                 <Box sx={{

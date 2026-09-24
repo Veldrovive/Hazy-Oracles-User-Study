@@ -9,19 +9,28 @@ import {
     ConversationHeader,
     Loader
 } from "@chatscope/chat-ui-kit-react";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface AgentChatProps {
     imageSrc: string;
     imageSide: 'incoming' | 'outgoing';
     initialMessages: any[];
-    onSend: (message: string) => void;
+    onSend: (message: string) => Promise<boolean> | boolean | void;
     firstResponseRef: React.RefObject<Element>;
     lastResponseRef: React.RefObject<Element>;
     loading: boolean;
 }
 
 export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstResponseRef, lastResponseRef, loading }: AgentChatProps) {
+    const [msgInputValue, setMsgInputValue] = useState("");
+
+    const handleSendClick = async (innerHtml: string, textContent: string, innerText: string) => {
+        // If the API allows passing both, onSend can be awaited to see if it succeeded.
+        const success = await onSend(textContent);
+        if (success !== false) {
+            setMsgInputValue("");
+        }
+    };
 
     useEffect(() => {
         console.log("ImageSrc", imageSrc);
@@ -75,7 +84,15 @@ export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstR
                                     </Message>
                                 }
                             </MessageList>
-                            <MessageInput autoFocus attachButton={false} placeholder="Type message here" onSend={onSend} disabled={loading} />
+                            <MessageInput 
+                                autoFocus 
+                                attachButton={false} 
+                                placeholder="Type message here" 
+                                value={msgInputValue}
+                                onChange={(innerHtml) => setMsgInputValue(innerHtml)}
+                                onSend={handleSendClick} 
+                                disabled={loading} 
+                            />
                         </ChatContainer>
                     </MainContainer>
                 </div>
