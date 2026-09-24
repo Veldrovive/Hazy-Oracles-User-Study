@@ -1,0 +1,546 @@
+// Dialog Tree Visualization
+digraph DialogTree_clarif_trees_train_002368 {
+	rankdir=LR
+	node [shape=plaintext]
+	clarif_trees_train_002368 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+        <tr><td bgcolor="#333333"><font color="white"><b>Root</b></font></td></tr>
+        <tr><td><img src="/Users/aidan/projects/phd/research/hazy-oracles-user-study/data/conversation_roots/clarif_trees/images/train_002368.jpg" scale="true" width="150"/></td></tr>
+        <tr><td>What condition does the man have?</td></tr>
+        
+    <tr><td bgcolor="#eeeeee">Unambiguous Q: The man eating the pizza has what type of skin<br/>condition on his face?</td></tr>
+    <tr><td bgcolor="#eeeeee">Original Dataset: clearvqa (ID: train_002368)</td></tr>
+    
+    </table>>]
+	"3b7e73e546a8839d9fa52a6f28919775b8a26dd67bac7f40d1d13a60749bbae5" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (A)</b></font></td></tr>
+            <tr><td>Next question from user index 3?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 3b7e73e5... | Participant: human</font></td></tr>
+        </table>>]
+	"3b7e73e546a8839d9fa52a6f28919775b8a26dd67bac7f40d1d13a60749bbae5_guess" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 3</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	"3b7e73e546a8839d9fa52a6f28919775b8a26dd67bac7f40d1d13a60749bbae5" -> "3b7e73e546a8839d9fa52a6f28919775b8a26dd67bac7f40d1d13a60749bbae5_guess"
+	"039b03ea0b44a27bbab94e2c98ae42c3b730f05e19456107ea8fce896b4c00c0" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (B)</b></font></td></tr>
+            <tr><td>Next question from user index 8?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 039b03ea... | Participant: human</font></td></tr>
+        </table>>]
+	"039b03ea0b44a27bbab94e2c98ae42c3b730f05e19456107ea8fce896b4c00c0_guess" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 8</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	"039b03ea0b44a27bbab94e2c98ae42c3b730f05e19456107ea8fce896b4c00c0" -> "039b03ea0b44a27bbab94e2c98ae42c3b730f05e19456107ea8fce896b4c00c0_guess"
+	bcac376f3299cf3258de3703008d8cf68ddd56307a487a1aad95e8cdd0bf0e3a [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BA)</b></font></td></tr>
+            <tr><td>Answer from user index 14.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: bcac376f... | Participant: human</font></td></tr>
+        </table>>]
+	"85594e984bbcb1f40456a167d278150dbfb42a97c72be625eb30ec48a7ba5a1c" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BB)</b></font></td></tr>
+            <tr><td>Answer from user index 5.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 85594e98... | Participant: human</font></td></tr>
+        </table>>]
+	c1400b4f94d93ee76914a3f28e96f6ec99533fd19a7b5546137e76aefb229c9f [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BC)</b></font></td></tr>
+            <tr><td>Answer from user index 13.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: c1400b4f... | Participant: human</font></td></tr>
+        </table>>]
+	f7e8f5daaaa15bf81d9f539e3a677ad8179939f08b7d71098a59657835d8cb7d [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BD)</b></font></td></tr>
+            <tr><td>Answer from user index 0.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: f7e8f5da... | Participant: human</font></td></tr>
+        </table>>]
+	"338a4294a7ef7edfbe8336c887380a68dc62ee52ee85821b40610a00c0d0a83a" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (BDA)</b></font></td></tr>
+            <tr><td>Next question from user index 22?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 338a4294... | Participant: human</font></td></tr>
+        </table>>]
+	"338a4294a7ef7edfbe8336c887380a68dc62ee52ee85821b40610a00c0d0a83a_guess" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 22</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	"338a4294a7ef7edfbe8336c887380a68dc62ee52ee85821b40610a00c0d0a83a" -> "338a4294a7ef7edfbe8336c887380a68dc62ee52ee85821b40610a00c0d0a83a_guess"
+	"3904b1cee7407a209bd8ceebf73766f5a6117335adf8d31e6d8dc0d81e0a3f52" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (BDB)</b></font></td></tr>
+            <tr><td>Next question from user index 20?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 3904b1ce... | Participant: human</font></td></tr>
+        </table>>]
+	"3904b1cee7407a209bd8ceebf73766f5a6117335adf8d31e6d8dc0d81e0a3f52_guess" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 20</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	"3904b1cee7407a209bd8ceebf73766f5a6117335adf8d31e6d8dc0d81e0a3f52" -> "3904b1cee7407a209bd8ceebf73766f5a6117335adf8d31e6d8dc0d81e0a3f52_guess"
+	d167e199904d36e2cbe7ad66eadbdc5de9aef7445a42197a266d8d4b38f24a7a [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDAA)</b></font></td></tr>
+            <tr><td>Answer from user index 1.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: d167e199... | Participant: human</font></td></tr>
+        </table>>]
+	b9de800d006cc425158fdc87d4bcc02662f2a240a3f6943e8ec4f289b5ea5ab2 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDAB)</b></font></td></tr>
+            <tr><td>Answer from user index 16.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: b9de800d... | Participant: human</font></td></tr>
+        </table>>]
+	dfcdd7d37a83c70fa600db464e4a823403e89b8cc7b8501a9cb3afe7e41a3e96 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDAC)</b></font></td></tr>
+            <tr><td>Answer from user index 7.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: dfcdd7d3... | Participant: human</font></td></tr>
+        </table>>]
+	"0b87c343c3dfe336c5ea02ca890f0ff7f1432236d2b7ff11d5caeebecf995931" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDAD)</b></font></td></tr>
+            <tr><td>Answer from user index 10.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 0b87c343... | Participant: human</font></td></tr>
+        </table>>]
+	"21ea5eadd39d013a11c0950d8e28b1cbdf4b8ae0c09aa0bbb44f15765947422f" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AA)</b></font></td></tr>
+            <tr><td>Answer from user index 26.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 21ea5ead... | Participant: human</font></td></tr>
+        </table>>]
+	da48aed78b230591a560d3fd3940b266ccbb0b476f11cfd50b8818713de29330 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AB)</b></font></td></tr>
+            <tr><td>Answer from user index 4.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: da48aed7... | Participant: human</font></td></tr>
+        </table>>]
+	"6bbb35da6cb8289f2651adefe375fa1ef0a8b8bddff16b35cf2a160c5bc7a191" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AC)</b></font></td></tr>
+            <tr><td>Answer from user index 23.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 6bbb35da... | Participant: human</font></td></tr>
+        </table>>]
+	"058d0d1a062642a94d0bd987026281aeaaeb4f45d5ac16d8de3410b215c04490" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AD)</b></font></td></tr>
+            <tr><td>Answer from user index 12.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 058d0d1a... | Participant: human</font></td></tr>
+        </table>>]
+	d7949ebde9544c813be7f7ea203c546293e0c2eca13f7b3de4feff18e4182b5e [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (AAA)</b></font></td></tr>
+            <tr><td>Next question from user index 27?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: d7949ebd... | Participant: human</font></td></tr>
+        </table>>]
+	d7949ebde9544c813be7f7ea203c546293e0c2eca13f7b3de4feff18e4182b5e_guess [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 27</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	d7949ebde9544c813be7f7ea203c546293e0c2eca13f7b3de4feff18e4182b5e -> d7949ebde9544c813be7f7ea203c546293e0c2eca13f7b3de4feff18e4182b5e_guess
+	"515706b1c86fa83377cd81e2d84d4c7ad4ec13c381147940c06dc6c9e4c8caad" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (AAB)</b></font></td></tr>
+            <tr><td>Next question from user index 59?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 515706b1... | Participant: human</font></td></tr>
+        </table>>]
+	"515706b1c86fa83377cd81e2d84d4c7ad4ec13c381147940c06dc6c9e4c8caad_guess" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 59</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	"515706b1c86fa83377cd81e2d84d4c7ad4ec13c381147940c06dc6c9e4c8caad" -> "515706b1c86fa83377cd81e2d84d4c7ad4ec13c381147940c06dc6c9e4c8caad_guess"
+	fff03d9803e39de5e0db0616e667bcc69a07d58823c2d1640ace99674fd77732 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AAAA)</b></font></td></tr>
+            <tr><td>Answer from user index 25.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: fff03d98... | Participant: human</font></td></tr>
+        </table>>]
+	"7ff72817fcb091e036eb7ac991c79ca345540f028245b83f94f80e5da3046c70" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AAAB)</b></font></td></tr>
+            <tr><td>Answer from user index 21.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 7ff72817... | Participant: human</font></td></tr>
+        </table>>]
+	c4382872f5b5d7cf90a9a19989e38b50c5b8acd59018f4e06570588cd4b7c450 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AAAC)</b></font></td></tr>
+            <tr><td>Answer from user index 34.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: c4382872... | Participant: human</font></td></tr>
+        </table>>]
+	"07e13bebdcfad54d4b0664110810b65e1b7006baa15c824320b7b78aacbeb7a7" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AAAD)</b></font></td></tr>
+            <tr><td>Answer from user index 36.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 07e13beb... | Participant: human</font></td></tr>
+        </table>>]
+	a4f92f9eab794c190971b050611636bb337c5488d59947f94716dae867734c6d [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (AAABA)</b></font></td></tr>
+            <tr><td>Next question from user index 11?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: a4f92f9e... | Participant: human</font></td></tr>
+        </table>>]
+	a4f92f9eab794c190971b050611636bb337c5488d59947f94716dae867734c6d_guess [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 11</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	a4f92f9eab794c190971b050611636bb337c5488d59947f94716dae867734c6d -> a4f92f9eab794c190971b050611636bb337c5488d59947f94716dae867734c6d_guess
+	d47c2defd7d1d01108882395ad209d6acbfdffdfe2c07843b639a510648a1aed [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (AAABB)</b></font></td></tr>
+            <tr><td>Next question from user index 33?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: d47c2def... | Participant: human</font></td></tr>
+        </table>>]
+	d47c2defd7d1d01108882395ad209d6acbfdffdfe2c07843b639a510648a1aed_guess [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 33</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	d47c2defd7d1d01108882395ad209d6acbfdffdfe2c07843b639a510648a1aed -> d47c2defd7d1d01108882395ad209d6acbfdffdfe2c07843b639a510648a1aed_guess
+	df0c1c9abcc98660b5dcfc3e103b59b21ccc17d5ed488a397e6c620a702cf745 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AAABAA)</b></font></td></tr>
+            <tr><td>Answer from user index 15.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: df0c1c9a... | Participant: human</font></td></tr>
+        </table>>]
+	eb0fbf7fcdc07c0e2573e6ddad23a34e2ee79d32afa220fbc66093d4ee09e570 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AAABAB)</b></font></td></tr>
+            <tr><td>Answer from user index 28.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: eb0fbf7f... | Participant: human</font></td></tr>
+        </table>>]
+	a1d6f801c146d33a9b622118daf978c756a722cdaef99d089107dab872c35067 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AAABAC)</b></font></td></tr>
+            <tr><td>Answer from user index 6.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: a1d6f801... | Participant: human</font></td></tr>
+        </table>>]
+	c9a88e294ee4450853b731f049e082933199f25f627c53d757a266ec3ba897a5 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AAABAD)</b></font></td></tr>
+            <tr><td>Answer from user index 37.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: c9a88e29... | Participant: human</font></td></tr>
+        </table>>]
+	"880cccc9f272a94cab95792d8f3d44a54070c5aa72bf81c5dec701e6f72a694c" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDBA)</b></font></td></tr>
+            <tr><td>Answer from user index 19.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 880cccc9... | Participant: human</font></td></tr>
+        </table>>]
+	"8de09962365ad5ea90be5ee86484ae59194b40e535b9f4a2b90b887c0f419163" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDBB)</b></font></td></tr>
+            <tr><td>Answer from user index 29.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 8de09962... | Participant: human</font></td></tr>
+        </table>>]
+	"194190f9666c0fac37c9cab579cafe4b3b1af7459a97a919b25dadf8318e2c0b" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDBC)</b></font></td></tr>
+            <tr><td>Answer from user index 24.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 194190f9... | Participant: human</font></td></tr>
+        </table>>]
+	"0f45821d78fdf865ee25e31c8af1c102d64a7c921513509fcbbc2f940f5254f2" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDBD)</b></font></td></tr>
+            <tr><td>Answer from user index 18.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 0f45821d... | Participant: human</font></td></tr>
+        </table>>]
+	ef27ac3a44487829321f9abfa8d450d3022e17aae78ea242aeefb0805ea90d53 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (BDBCA)</b></font></td></tr>
+            <tr><td>Next question from user index 62?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: ef27ac3a... | Participant: human</font></td></tr>
+        </table>>]
+	ef27ac3a44487829321f9abfa8d450d3022e17aae78ea242aeefb0805ea90d53_guess [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 62</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	ef27ac3a44487829321f9abfa8d450d3022e17aae78ea242aeefb0805ea90d53 -> ef27ac3a44487829321f9abfa8d450d3022e17aae78ea242aeefb0805ea90d53_guess
+	fb64a0af7b1611d555c4ed0255843a997b4b38a66a8c19b60a574c431c6ba649 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (BDBCB)</b></font></td></tr>
+            <tr><td>Next question from user index 30?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: fb64a0af... | Participant: human</font></td></tr>
+        </table>>]
+	fb64a0af7b1611d555c4ed0255843a997b4b38a66a8c19b60a574c431c6ba649_guess [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 30</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	fb64a0af7b1611d555c4ed0255843a997b4b38a66a8c19b60a574c431c6ba649 -> fb64a0af7b1611d555c4ed0255843a997b4b38a66a8c19b60a574c431c6ba649_guess
+	dd8b4ee75482ce674d236086af7c2e8352d19dec8cc224088414cef3be0d421e [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDBCAA)</b></font></td></tr>
+            <tr><td>Answer from user index 2.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: dd8b4ee7... | Participant: human</font></td></tr>
+        </table>>]
+	b67abe5427749858ac454a118f3b2270a83a6ef23f001702727d23e94cff00ef [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDBCAB)</b></font></td></tr>
+            <tr><td>Answer from user index 9.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: b67abe54... | Participant: human</font></td></tr>
+        </table>>]
+	"0d607340389cf25d099a4e131587745fb25182032186394b258f04913fe7aab3" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDBCAC)</b></font></td></tr>
+            <tr><td>Answer from user index 31.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 0d607340... | Participant: human</font></td></tr>
+        </table>>]
+	"764fe9ad9551db0ad51ea7200b3d50db859d2f01b3bf8d5dc3cc80d837255769" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDBCAD)</b></font></td></tr>
+            <tr><td>Answer from user index 38.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 764fe9ad... | Participant: human</font></td></tr>
+        </table>>]
+	"3bc8a66936d6db8c27bf258563597113529f8e17faab1e1612de24fc591d1933" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDBCBA)</b></font></td></tr>
+            <tr><td>Answer from user index 48.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 3bc8a669... | Participant: human</font></td></tr>
+        </table>>]
+	a5db5231ef9fee406989fb523c24319365e6512a8c1cf0ad8b5de9cd22e50561 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDBCBB)</b></font></td></tr>
+            <tr><td>Answer from user index 40.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: a5db5231... | Participant: human</font></td></tr>
+        </table>>]
+	"1e8daf54bf1c0a2b8361cd919e8bda27cd5d49c38e634b873f7edfc5d8e439cc" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDBCBC)</b></font></td></tr>
+            <tr><td>Answer from user index 42.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 1e8daf54... | Participant: human</font></td></tr>
+        </table>>]
+	cf6addb4df8b7c6757d1f3d4692aae42a226dc26fccffae30e47721647f9180f [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDBCBD)</b></font></td></tr>
+            <tr><td>Answer from user index 50.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: cf6addb4... | Participant: human</font></td></tr>
+        </table>>]
+	"2a75613dfd97f02496b59cc1f7e4989d5d5d0499528d69de8e03f7370adc63c2" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (BDABA)</b></font></td></tr>
+            <tr><td>Next question from user index 60?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 2a75613d... | Participant: human</font></td></tr>
+        </table>>]
+	"2a75613dfd97f02496b59cc1f7e4989d5d5d0499528d69de8e03f7370adc63c2_guess" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 60</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	"2a75613dfd97f02496b59cc1f7e4989d5d5d0499528d69de8e03f7370adc63c2" -> "2a75613dfd97f02496b59cc1f7e4989d5d5d0499528d69de8e03f7370adc63c2_guess"
+	bac4346f9efab17e67f96312356b48e0b72ca464db6f90a0aacfc685824f8fa8 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (BDABB)</b></font></td></tr>
+            <tr><td>Next question from user index 45?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: bac4346f... | Participant: human</font></td></tr>
+        </table>>]
+	bac4346f9efab17e67f96312356b48e0b72ca464db6f90a0aacfc685824f8fa8_guess [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 45</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	bac4346f9efab17e67f96312356b48e0b72ca464db6f90a0aacfc685824f8fa8 -> bac4346f9efab17e67f96312356b48e0b72ca464db6f90a0aacfc685824f8fa8_guess
+	c6bf479b9f4ecc233aa4d0f8cff7d40f014bdc04207f624f5b43c45530cfe91e [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDABAA)</b></font></td></tr>
+            <tr><td>Answer from user index 32.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: c6bf479b... | Participant: human</font></td></tr>
+        </table>>]
+	ae5233906b5db25cd5899a9d55a9eaefb82577e079eb7bdd494192c66eb8148c [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDABAB)</b></font></td></tr>
+            <tr><td>Answer from user index 52.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: ae523390... | Participant: human</font></td></tr>
+        </table>>]
+	"79d8a3b1ef4bf82b03ea78d65c6cee3beb5ee193c20911cb6c57ca0bb86dbf90" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDABAC)</b></font></td></tr>
+            <tr><td>Answer from user index 47.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 79d8a3b1... | Participant: human</font></td></tr>
+        </table>>]
+	d445840dbc3234b4feddee58f9314a206feee1b223ae5207c26ef172ad1f0eba [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDABAD)</b></font></td></tr>
+            <tr><td>Answer from user index 35.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: d445840d... | Participant: human</font></td></tr>
+        </table>>]
+	"6c4e323603d2bc613ca39f65e79d0ae10180d4fa9eb13719d07d6288f85ad647" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDABBA)</b></font></td></tr>
+            <tr><td>Answer from user index 43.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 6c4e3236... | Participant: human</font></td></tr>
+        </table>>]
+	"1b1cc653c89e8a045888b00e9d9f8938d1aa2cf931a4740fae4de43d65733f87" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDABBB)</b></font></td></tr>
+            <tr><td>Answer from user index 41.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 1b1cc653... | Participant: human</font></td></tr>
+        </table>>]
+	"20e5b3b123d2fca02f887fcf5e7126bf3c5a457eba5a131faf62a08442a23937" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDABBC)</b></font></td></tr>
+            <tr><td>Answer from user index 56.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 20e5b3b1... | Participant: human</font></td></tr>
+        </table>>]
+	"69a73b56c5e279c507796bb75c100d112efe53db2736ea8e83510a56862adef3" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (BDABBD)</b></font></td></tr>
+            <tr><td>Answer from user index 51.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 69a73b56... | Participant: human</font></td></tr>
+        </table>>]
+	"0d9c277d767d923485b7383a0fb74cbe4e5169cdf9646b327d8fd3f383b8a6a2" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AABA)</b></font></td></tr>
+            <tr><td>Answer from user index 44.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 0d9c277d... | Participant: human</font></td></tr>
+        </table>>]
+	"72ad364f83a52e997b4d36bfb974376f93ff729f7d0c8e2a3b842ae036ee5e15" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AABB)</b></font></td></tr>
+            <tr><td>Answer from user index 17.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 72ad364f... | Participant: human</font></td></tr>
+        </table>>]
+	"5d0070beb8dc5aa3dbd727f271d5be34b4a1273741ef819153d2c9b4c9ff4276" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AABC)</b></font></td></tr>
+            <tr><td>Answer from user index 58.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 5d0070be... | Participant: human</font></td></tr>
+        </table>>]
+	"044fcd905d1b54a388c64b3bb5c139c3bd4ff626f5e9f600c51ad95203f350f5" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AABD)</b></font></td></tr>
+            <tr><td>Answer from user index 49.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 044fcd90... | Participant: human</font></td></tr>
+        </table>>]
+	cc72205c37eab87c95efb3f17c5d5cad9d4799cfa22787a1bda121b2800e4f10 [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (AABBA)</b></font></td></tr>
+            <tr><td>Next question from user index 63?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: cc72205c... | Participant: human</font></td></tr>
+        </table>>]
+	cc72205c37eab87c95efb3f17c5d5cad9d4799cfa22787a1bda121b2800e4f10_guess [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 63</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	cc72205c37eab87c95efb3f17c5d5cad9d4799cfa22787a1bda121b2800e4f10 -> cc72205c37eab87c95efb3f17c5d5cad9d4799cfa22787a1bda121b2800e4f10_guess
+	"233df4aa0b6b15cca92c97a00778637a6640c2c505622239a0af91c4fa2166cf" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#FFF3E0">
+            <tr><td bgcolor="#333333"><font color="white"><b>Asker (AABBB)</b></font></td></tr>
+            <tr><td>Next question from user index 39?</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Ans Meaningful: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 233df4aa... | Participant: human</font></td></tr>
+        </table>>]
+	"233df4aa0b6b15cca92c97a00778637a6640c2c505622239a0af91c4fa2166cf_guess" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E8F5E9">
+                <tr><td bgcolor="#333333"><font color="white"><b>Inference</b></font></td></tr>
+                <tr><td>Guess: Guess from user index 39</td></tr>
+                <tr><td bgcolor="#eeeeee">Guess Conf: 5.00<br/></td></tr>
+            </table>>]
+	"233df4aa0b6b15cca92c97a00778637a6640c2c505622239a0af91c4fa2166cf" -> "233df4aa0b6b15cca92c97a00778637a6640c2c505622239a0af91c4fa2166cf_guess"
+	"4ceba4b47365ba5f4b7ae3d39c426d8f8b0815116ea8acc8b4b493b4a47305c0" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AABBBA)</b></font></td></tr>
+            <tr><td>Answer from user index 54.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 4ceba4b4... | Participant: human</font></td></tr>
+        </table>>]
+	c391755babc6fee774fb8487449c1d41079d69822f880146cdbb5572e7d9b52c [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AABBBB)</b></font></td></tr>
+            <tr><td>Answer from user index 55.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: c391755b... | Participant: human</font></td></tr>
+        </table>>]
+	"73b9908372d061545feebdcf87746d6bce6f914f70e0ff51f1926e40bd1bf473" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AABBBC)</b></font></td></tr>
+            <tr><td>Answer from user index 61.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 73b99083... | Participant: human</font></td></tr>
+        </table>>]
+	"7d582ff88d8425888d17a854128466368c0d67516b173343c036a84b1b105883" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AABBBD)</b></font></td></tr>
+            <tr><td>Answer from user index 57.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 7d582ff8... | Participant: human</font></td></tr>
+        </table>>]
+	"22e9a9b708348a401a0c9fc5dd380505b2c1ef614be4ee0b0bdc41325fd41cab" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AABBAA)</b></font></td></tr>
+            <tr><td>Answer from user index 46.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 22e9a9b7... | Participant: human</font></td></tr>
+        </table>>]
+	"1d566558204c5f74fd747de65c4de41a259e4e29cd24c4095c5f65d7fc88d950" [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="#E0F7FA">
+            <tr><td bgcolor="#333333"><font color="white"><b>Answerer (AABBAB)</b></font></td></tr>
+            <tr><td>Answer from user index 53.</td></tr>
+            <tr><td bgcolor="#eeeeee">Prev Q Relevant: 5.00<br/>Prev Q Informative: 5.00<br/></td></tr>
+            <tr><td bgcolor="#eeeeee"><font point-size="10">ID: 1d566558... | Participant: human</font></td></tr>
+        </table>>]
+	clarif_trees_train_002368 -> "3b7e73e546a8839d9fa52a6f28919775b8a26dd67bac7f40d1d13a60749bbae5"
+	clarif_trees_train_002368 -> "039b03ea0b44a27bbab94e2c98ae42c3b730f05e19456107ea8fce896b4c00c0"
+	"039b03ea0b44a27bbab94e2c98ae42c3b730f05e19456107ea8fce896b4c00c0" -> bcac376f3299cf3258de3703008d8cf68ddd56307a487a1aad95e8cdd0bf0e3a
+	"039b03ea0b44a27bbab94e2c98ae42c3b730f05e19456107ea8fce896b4c00c0" -> "85594e984bbcb1f40456a167d278150dbfb42a97c72be625eb30ec48a7ba5a1c"
+	"039b03ea0b44a27bbab94e2c98ae42c3b730f05e19456107ea8fce896b4c00c0" -> c1400b4f94d93ee76914a3f28e96f6ec99533fd19a7b5546137e76aefb229c9f
+	"039b03ea0b44a27bbab94e2c98ae42c3b730f05e19456107ea8fce896b4c00c0" -> f7e8f5daaaa15bf81d9f539e3a677ad8179939f08b7d71098a59657835d8cb7d
+	f7e8f5daaaa15bf81d9f539e3a677ad8179939f08b7d71098a59657835d8cb7d -> "338a4294a7ef7edfbe8336c887380a68dc62ee52ee85821b40610a00c0d0a83a"
+	f7e8f5daaaa15bf81d9f539e3a677ad8179939f08b7d71098a59657835d8cb7d -> "3904b1cee7407a209bd8ceebf73766f5a6117335adf8d31e6d8dc0d81e0a3f52"
+	"338a4294a7ef7edfbe8336c887380a68dc62ee52ee85821b40610a00c0d0a83a" -> d167e199904d36e2cbe7ad66eadbdc5de9aef7445a42197a266d8d4b38f24a7a
+	"338a4294a7ef7edfbe8336c887380a68dc62ee52ee85821b40610a00c0d0a83a" -> b9de800d006cc425158fdc87d4bcc02662f2a240a3f6943e8ec4f289b5ea5ab2
+	"338a4294a7ef7edfbe8336c887380a68dc62ee52ee85821b40610a00c0d0a83a" -> dfcdd7d37a83c70fa600db464e4a823403e89b8cc7b8501a9cb3afe7e41a3e96
+	"338a4294a7ef7edfbe8336c887380a68dc62ee52ee85821b40610a00c0d0a83a" -> "0b87c343c3dfe336c5ea02ca890f0ff7f1432236d2b7ff11d5caeebecf995931"
+	"3b7e73e546a8839d9fa52a6f28919775b8a26dd67bac7f40d1d13a60749bbae5" -> "21ea5eadd39d013a11c0950d8e28b1cbdf4b8ae0c09aa0bbb44f15765947422f"
+	"3b7e73e546a8839d9fa52a6f28919775b8a26dd67bac7f40d1d13a60749bbae5" -> da48aed78b230591a560d3fd3940b266ccbb0b476f11cfd50b8818713de29330
+	"3b7e73e546a8839d9fa52a6f28919775b8a26dd67bac7f40d1d13a60749bbae5" -> "6bbb35da6cb8289f2651adefe375fa1ef0a8b8bddff16b35cf2a160c5bc7a191"
+	"3b7e73e546a8839d9fa52a6f28919775b8a26dd67bac7f40d1d13a60749bbae5" -> "058d0d1a062642a94d0bd987026281aeaaeb4f45d5ac16d8de3410b215c04490"
+	"21ea5eadd39d013a11c0950d8e28b1cbdf4b8ae0c09aa0bbb44f15765947422f" -> d7949ebde9544c813be7f7ea203c546293e0c2eca13f7b3de4feff18e4182b5e
+	"21ea5eadd39d013a11c0950d8e28b1cbdf4b8ae0c09aa0bbb44f15765947422f" -> "515706b1c86fa83377cd81e2d84d4c7ad4ec13c381147940c06dc6c9e4c8caad"
+	d7949ebde9544c813be7f7ea203c546293e0c2eca13f7b3de4feff18e4182b5e -> fff03d9803e39de5e0db0616e667bcc69a07d58823c2d1640ace99674fd77732
+	d7949ebde9544c813be7f7ea203c546293e0c2eca13f7b3de4feff18e4182b5e -> "7ff72817fcb091e036eb7ac991c79ca345540f028245b83f94f80e5da3046c70"
+	d7949ebde9544c813be7f7ea203c546293e0c2eca13f7b3de4feff18e4182b5e -> c4382872f5b5d7cf90a9a19989e38b50c5b8acd59018f4e06570588cd4b7c450
+	d7949ebde9544c813be7f7ea203c546293e0c2eca13f7b3de4feff18e4182b5e -> "07e13bebdcfad54d4b0664110810b65e1b7006baa15c824320b7b78aacbeb7a7"
+	"7ff72817fcb091e036eb7ac991c79ca345540f028245b83f94f80e5da3046c70" -> a4f92f9eab794c190971b050611636bb337c5488d59947f94716dae867734c6d
+	"7ff72817fcb091e036eb7ac991c79ca345540f028245b83f94f80e5da3046c70" -> d47c2defd7d1d01108882395ad209d6acbfdffdfe2c07843b639a510648a1aed
+	a4f92f9eab794c190971b050611636bb337c5488d59947f94716dae867734c6d -> df0c1c9abcc98660b5dcfc3e103b59b21ccc17d5ed488a397e6c620a702cf745
+	a4f92f9eab794c190971b050611636bb337c5488d59947f94716dae867734c6d -> eb0fbf7fcdc07c0e2573e6ddad23a34e2ee79d32afa220fbc66093d4ee09e570
+	a4f92f9eab794c190971b050611636bb337c5488d59947f94716dae867734c6d -> a1d6f801c146d33a9b622118daf978c756a722cdaef99d089107dab872c35067
+	a4f92f9eab794c190971b050611636bb337c5488d59947f94716dae867734c6d -> c9a88e294ee4450853b731f049e082933199f25f627c53d757a266ec3ba897a5
+	"3904b1cee7407a209bd8ceebf73766f5a6117335adf8d31e6d8dc0d81e0a3f52" -> "880cccc9f272a94cab95792d8f3d44a54070c5aa72bf81c5dec701e6f72a694c"
+	"3904b1cee7407a209bd8ceebf73766f5a6117335adf8d31e6d8dc0d81e0a3f52" -> "8de09962365ad5ea90be5ee86484ae59194b40e535b9f4a2b90b887c0f419163"
+	"3904b1cee7407a209bd8ceebf73766f5a6117335adf8d31e6d8dc0d81e0a3f52" -> "194190f9666c0fac37c9cab579cafe4b3b1af7459a97a919b25dadf8318e2c0b"
+	"3904b1cee7407a209bd8ceebf73766f5a6117335adf8d31e6d8dc0d81e0a3f52" -> "0f45821d78fdf865ee25e31c8af1c102d64a7c921513509fcbbc2f940f5254f2"
+	"194190f9666c0fac37c9cab579cafe4b3b1af7459a97a919b25dadf8318e2c0b" -> ef27ac3a44487829321f9abfa8d450d3022e17aae78ea242aeefb0805ea90d53
+	"194190f9666c0fac37c9cab579cafe4b3b1af7459a97a919b25dadf8318e2c0b" -> fb64a0af7b1611d555c4ed0255843a997b4b38a66a8c19b60a574c431c6ba649
+	ef27ac3a44487829321f9abfa8d450d3022e17aae78ea242aeefb0805ea90d53 -> dd8b4ee75482ce674d236086af7c2e8352d19dec8cc224088414cef3be0d421e
+	ef27ac3a44487829321f9abfa8d450d3022e17aae78ea242aeefb0805ea90d53 -> b67abe5427749858ac454a118f3b2270a83a6ef23f001702727d23e94cff00ef
+	ef27ac3a44487829321f9abfa8d450d3022e17aae78ea242aeefb0805ea90d53 -> "0d607340389cf25d099a4e131587745fb25182032186394b258f04913fe7aab3"
+	ef27ac3a44487829321f9abfa8d450d3022e17aae78ea242aeefb0805ea90d53 -> "764fe9ad9551db0ad51ea7200b3d50db859d2f01b3bf8d5dc3cc80d837255769"
+	fb64a0af7b1611d555c4ed0255843a997b4b38a66a8c19b60a574c431c6ba649 -> "3bc8a66936d6db8c27bf258563597113529f8e17faab1e1612de24fc591d1933"
+	fb64a0af7b1611d555c4ed0255843a997b4b38a66a8c19b60a574c431c6ba649 -> a5db5231ef9fee406989fb523c24319365e6512a8c1cf0ad8b5de9cd22e50561
+	fb64a0af7b1611d555c4ed0255843a997b4b38a66a8c19b60a574c431c6ba649 -> "1e8daf54bf1c0a2b8361cd919e8bda27cd5d49c38e634b873f7edfc5d8e439cc"
+	fb64a0af7b1611d555c4ed0255843a997b4b38a66a8c19b60a574c431c6ba649 -> cf6addb4df8b7c6757d1f3d4692aae42a226dc26fccffae30e47721647f9180f
+	b9de800d006cc425158fdc87d4bcc02662f2a240a3f6943e8ec4f289b5ea5ab2 -> "2a75613dfd97f02496b59cc1f7e4989d5d5d0499528d69de8e03f7370adc63c2"
+	b9de800d006cc425158fdc87d4bcc02662f2a240a3f6943e8ec4f289b5ea5ab2 -> bac4346f9efab17e67f96312356b48e0b72ca464db6f90a0aacfc685824f8fa8
+	"2a75613dfd97f02496b59cc1f7e4989d5d5d0499528d69de8e03f7370adc63c2" -> c6bf479b9f4ecc233aa4d0f8cff7d40f014bdc04207f624f5b43c45530cfe91e
+	"2a75613dfd97f02496b59cc1f7e4989d5d5d0499528d69de8e03f7370adc63c2" -> ae5233906b5db25cd5899a9d55a9eaefb82577e079eb7bdd494192c66eb8148c
+	"2a75613dfd97f02496b59cc1f7e4989d5d5d0499528d69de8e03f7370adc63c2" -> "79d8a3b1ef4bf82b03ea78d65c6cee3beb5ee193c20911cb6c57ca0bb86dbf90"
+	"2a75613dfd97f02496b59cc1f7e4989d5d5d0499528d69de8e03f7370adc63c2" -> d445840dbc3234b4feddee58f9314a206feee1b223ae5207c26ef172ad1f0eba
+	bac4346f9efab17e67f96312356b48e0b72ca464db6f90a0aacfc685824f8fa8 -> "6c4e323603d2bc613ca39f65e79d0ae10180d4fa9eb13719d07d6288f85ad647"
+	bac4346f9efab17e67f96312356b48e0b72ca464db6f90a0aacfc685824f8fa8 -> "1b1cc653c89e8a045888b00e9d9f8938d1aa2cf931a4740fae4de43d65733f87"
+	bac4346f9efab17e67f96312356b48e0b72ca464db6f90a0aacfc685824f8fa8 -> "20e5b3b123d2fca02f887fcf5e7126bf3c5a457eba5a131faf62a08442a23937"
+	bac4346f9efab17e67f96312356b48e0b72ca464db6f90a0aacfc685824f8fa8 -> "69a73b56c5e279c507796bb75c100d112efe53db2736ea8e83510a56862adef3"
+	"515706b1c86fa83377cd81e2d84d4c7ad4ec13c381147940c06dc6c9e4c8caad" -> "0d9c277d767d923485b7383a0fb74cbe4e5169cdf9646b327d8fd3f383b8a6a2"
+	"515706b1c86fa83377cd81e2d84d4c7ad4ec13c381147940c06dc6c9e4c8caad" -> "72ad364f83a52e997b4d36bfb974376f93ff729f7d0c8e2a3b842ae036ee5e15"
+	"515706b1c86fa83377cd81e2d84d4c7ad4ec13c381147940c06dc6c9e4c8caad" -> "5d0070beb8dc5aa3dbd727f271d5be34b4a1273741ef819153d2c9b4c9ff4276"
+	"515706b1c86fa83377cd81e2d84d4c7ad4ec13c381147940c06dc6c9e4c8caad" -> "044fcd905d1b54a388c64b3bb5c139c3bd4ff626f5e9f600c51ad95203f350f5"
+	"72ad364f83a52e997b4d36bfb974376f93ff729f7d0c8e2a3b842ae036ee5e15" -> cc72205c37eab87c95efb3f17c5d5cad9d4799cfa22787a1bda121b2800e4f10
+	"72ad364f83a52e997b4d36bfb974376f93ff729f7d0c8e2a3b842ae036ee5e15" -> "233df4aa0b6b15cca92c97a00778637a6640c2c505622239a0af91c4fa2166cf"
+	"233df4aa0b6b15cca92c97a00778637a6640c2c505622239a0af91c4fa2166cf" -> "4ceba4b47365ba5f4b7ae3d39c426d8f8b0815116ea8acc8b4b493b4a47305c0"
+	"233df4aa0b6b15cca92c97a00778637a6640c2c505622239a0af91c4fa2166cf" -> c391755babc6fee774fb8487449c1d41079d69822f880146cdbb5572e7d9b52c
+	"233df4aa0b6b15cca92c97a00778637a6640c2c505622239a0af91c4fa2166cf" -> "73b9908372d061545feebdcf87746d6bce6f914f70e0ff51f1926e40bd1bf473"
+	"233df4aa0b6b15cca92c97a00778637a6640c2c505622239a0af91c4fa2166cf" -> "7d582ff88d8425888d17a854128466368c0d67516b173343c036a84b1b105883"
+	cc72205c37eab87c95efb3f17c5d5cad9d4799cfa22787a1bda121b2800e4f10 -> "22e9a9b708348a401a0c9fc5dd380505b2c1ef614be4ee0b0bdc41325fd41cab"
+	cc72205c37eab87c95efb3f17c5d5cad9d4799cfa22787a1bda121b2800e4f10 -> "1d566558204c5f74fd747de65c4de41a259e4e29cd24c4095c5f65d7fc88d950"
+}
