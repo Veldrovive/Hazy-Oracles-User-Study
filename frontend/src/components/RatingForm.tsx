@@ -22,9 +22,10 @@ interface RatingFormProps {
     values: Record<string, number>;
     onChange: (id: string, value: number) => void;
     boxRef: React.RefObject<HTMLDivElement>;
+    setIsHovered?: (isHovered: boolean) => void;
 }
 
-export function RatingForm({ title, questions, values, onChange, boxRef }: RatingFormProps) {
+export function RatingForm({ title, questions, values, onChange, boxRef, setIsHovered }: RatingFormProps) {
 
     const valueLabelFormat = (q: RatingQuestion, value: number) => {
         if (q.valueLabels) {
@@ -40,6 +41,10 @@ export function RatingForm({ title, questions, values, onChange, boxRef }: Ratin
         <Box
             ref={boxRef}
             id="rating-box"
+            onMouseEnter={() => setIsHovered && setIsHovered(true)}
+            onMouseLeave={() => setIsHovered && setIsHovered(false)}
+            onFocus={() => setIsHovered && setIsHovered(true)}
+            onBlur={() => setIsHovered && setIsHovered(false)}
             sx={{
                 p: 2,
                 bgcolor: 'white',

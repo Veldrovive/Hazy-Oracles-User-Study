@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import {
     MainContainer,
@@ -51,7 +51,7 @@ export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstR
 
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', bgcolor: 'white' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, width: '100%', bgcolor: 'white' }}>
             <Box sx={{ flexGrow: 1, p: 0, display: 'flex', flexDirection: 'column', minHeight: 400 }}>
                 <div style={{ position: "relative", height: "100%", flexGrow: 1 }}>
                     <MainContainer>
@@ -69,10 +69,10 @@ export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstR
                                     <Message.ImageContent src={imageSrc} width="100%"></Message.ImageContent>
                                 </Message>
                                 {initialMessages.map((msg, i) => (
-                                    <Message 
-                                        key={msg.id || i} 
-                                        model={msg} 
-                                        id={i === initialMessages.length - 1 && i !== 0 ? "last-message" : `msg-${i}`} 
+                                    <Message
+                                        key={msg.id || i}
+                                        model={msg}
+                                        id={i === initialMessages.length - 1 && i !== 0 ? "last-message" : `msg-${i}`}
                                     />
                                 ))}
                                 {
@@ -84,15 +84,17 @@ export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstR
                                     </Message>
                                 }
                             </MessageList>
-                            <MessageInput 
-                                autoFocus 
-                                attachButton={false} 
-                                placeholder="Type message here" 
+                            <MessageInput
+                                autoFocus
+                                attachButton={false}
+                                placeholder="Type message here"
                                 value={msgInputValue}
                                 onChange={(innerHtml) => setMsgInputValue(innerHtml)}
-                                onSend={handleSendClick} 
-                                disabled={loading} 
-                            />
+                                onSend={handleSendClick}
+                                disabled={loading}
+                                sendButton={false}
+                            ></MessageInput>
+                            <Button>Test</Button>
                         </ChatContainer>
                     </MainContainer>
                 </div>

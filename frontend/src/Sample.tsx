@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, CircularProgress, Alert, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Tooltip, IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Box, CircularProgress, Alert, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Tooltip, IconButton, ToggleButton, ToggleButtonGroup, Drawer, List, ListItem, ListItemButton, ListItemText, ListItemIcon } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
 import SentimentNeutralIcon from '@mui/icons-material/SentimentNeutral';
 import SentimentSatisfiedIcon from '@mui/icons-material/SentimentSatisfied';
 import SentimentVerySatisfiedIcon from '@mui/icons-material/SentimentVerySatisfied';
+import MenuIcon from '@mui/icons-material/Menu';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { TaskInstructions } from './components/TaskInstructions';
 import { TargetQuestion } from './components/TargetQuestion';
 import { RatingForm } from './components/RatingForm';
@@ -181,6 +183,9 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
     const [ratings, setRatings] = useState<Record<string, number>>({});
     const [currentGuess, setCurrentGuess] = useState("");
     const [confidenceScore, setConfidenceScore] = useState<number | null>(null);
+    const [messageHtml, setMessageHtml] = useState("");
+    const [messageText, setMessageText] = useState("");
+
 
     const [currentErrorAlert, setCurrentErrorAlert] = useState<string | undefined>();
 
@@ -193,7 +198,8 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
     const [isIntendedQuestionhovered, setIsIntendedQuestionHovered] = useState(false);
     const [isCurrentGuessHovered, setIsCurrentGuessHovered] = useState(false);
     const [isCurrentGuessFocused, setIsCurrentGuessFocused] = useState(false);
-    const [showXarrow, setShowXarrow] = useState(false);
+    const [isRatingFormHovered, setIsRatingFormHovered] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const [showInstructionsModal, setShowInstructionsModal] = useState(
         (task_role === 'question_asker' && !hasReadAsker) ||
@@ -219,12 +225,7 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
         setShowInstructionsModal(false);
     };
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setShowXarrow(true);
-        }, 100);
-        return () => clearTimeout(timer);
-    }, []);
+    // Removed unconditional arrow timer
 
     const { instructions, detailed_instructions_title, detailed_instructions_content, rating_questions } = useMemo(() => {
         switch (task_role) {
@@ -280,6 +281,11 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
             setCurrentErrorAlert('Login not validated. Please wait a moment and retry.');
             return false;
         }
+        if (!res.trim()) {
+            setCurrentErrorAlert('Please type a message in the chat before submitting.');
+            return false;
+        }
+
 
         if (dialog_history.length > 0) {
             if (task_role === 'question_answerer') {
@@ -296,10 +302,6 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
         }
 
         if (task_role === 'question_asker') {
-            if (!currentGuess.trim()) {
-                setCurrentErrorAlert('Please enter your current guess.');
-                return false;
-            }
             if (confidenceScore === null) {
                 setCurrentErrorAlert('Please select a confidence score.');
                 return false;
@@ -371,7 +373,7 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                 </DialogActions>
             </Dialog>
 
-            {showXarrow && dialog_history.length > 0 && (
+            {isRatingFormHovered && dialog_history.length > 0 && (
                 <Xarrow
                     start='rating-box'
                     startAnchor={'auto'}
@@ -390,7 +392,6 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                     start={firstResponseRef}
                     startAnchor="auto"
                     zIndex={100}
-                    color="red"
                     curveness={0.4}
                 />
             }
@@ -402,10 +403,39 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                     start="current-guess-box"
                     startAnchor="auto"
                     zIndex={100}
-                    color="red"
                     curveness={0.4}
                 />
             }
+
+            <IconButton
+                onClick={() => setIsSidebarOpen(true)}
+                sx={{ position: 'fixed', top: 16, left: 16, zIndex: 1000, bgcolor: 'white', boxShadow: 1, '&:hover': { bgcolor: '#f0f0f0' } }}
+            >
+                <MenuIcon />
+            </IconButton>
+
+            <Drawer
+                anchor="left"
+                open={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+            >
+                <Box sx={{ width: 250, pt: 2 }} role="presentation" onClick={() => setIsSidebarOpen(false)}>
+                    <Typography variant="h6" sx={{ px: 2, pb: 2, borderBottom: '1px solid #e0e0e0' }}>
+                        Menu
+                    </Typography>
+                    <List>
+                        <ListItem disablePadding>
+                            <ListItemButton onClick={handleLogout}>
+                                <ListItemIcon>
+                                    <LogoutIcon color="error" />
+                                </ListItemIcon>
+                                <ListItemText primary="Log Out" sx={{ color: 'error.main' }} />
+                            </ListItemButton>
+                        </ListItem>
+                    </List>
+                </Box>
+            </Drawer>
+
             <Box sx={{
                 width: '100vw',
                 height: '100vh',
@@ -441,26 +471,32 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                                 values={ratings}
                                 onChange={handleRatingChange}
                                 boxRef={ratingBoxRef}
+                                setIsHovered={setIsRatingFormHovered}
                             />
                         )}
 
                         {
                             task_role === 'question_asker' && (
-                                <Box sx={{ mt: 2, p: 2, bgcolor: 'white', borderRadius: 1, border: '1px solid #e0e0e0', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                                <Box
+                                    id="current-guess-box"
+                                    onMouseEnter={() => setIsCurrentGuessHovered(true)}
+                                    onMouseLeave={() => setIsCurrentGuessHovered(false)}
+                                    onFocus={() => setIsCurrentGuessFocused(true)}
+                                    onBlur={() => setIsCurrentGuessFocused(false)}
+                                    sx={{ mt: 2, p: 2, bgcolor: 'white', borderRadius: 1, border: '1px solid #e0e0e0', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+                                >
                                     <Typography variant="h6" gutterBottom>
                                         Answer the original question
                                     </Typography>
+                                    <Typography variant="body2" sx={{ mb: 2 }}>
+                                        If you are completely unsure, leave the text box blank and choose "Not at all confident" for the confidence score.
+                                    </Typography>
                                     <TextField
-                                        id="current-guess-box"
                                         fullWidth
                                         size="small"
                                         label="What is your best guess for the answer to this original question?"
                                         value={currentGuess}
                                         onChange={(e) => setCurrentGuess(e.target.value)}
-                                        onMouseEnter={() => setIsCurrentGuessHovered(true)}
-                                        onMouseLeave={() => setIsCurrentGuessHovered(false)}
-                                        onFocus={() => setIsCurrentGuessFocused(true)}
-                                        onBlur={() => setIsCurrentGuessFocused(false)}
                                         sx={{ mb: 2 }}
                                     />
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -515,39 +551,51 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                                 </Box>
                             )
                         }
-                        <Button
-                            variant="outlined"
-                            color="error"
-                            onClick={handleLogout}
-                            sx={{ mt: 2 }}
-                        >
-                            Log Out
-                        </Button>
                     </Box>
                 </Box>
                 <Box sx={{
                     display: 'flex',
                     flex: 2, // Take up twice the space
                     flexDirection: "column",
-                    backgroundColor: 'white',
-                    borderRadius: '8px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    overflow: 'hidden' // For rounded corners
+                    gap: 0 // 24px spacing between agent chat and submit button
                 }}>
-                    <AgentChat
-                        imageSrc={multimodal_input.type === 'image' ? multimodal_input.url : ''}
-                        imageSide={task_role === 'question_asker' ? 'incoming' : 'outgoing'}
-                        initialMessages={chatHistory}
-                        onSend={handleSend}
-                        lastResponseRef={lastResponseRef}
-                        firstResponseRef={firstResponseRef}
-                        loading={!isValidated || isSendingResponse}
-                    />
-                    {
-                        currentErrorAlert && (
-                            <Alert severity="error">{currentErrorAlert}</Alert>
-                        )
-                    }
+                    <Box sx={{
+                        display: 'flex',
+                        flex: 1,
+                        flexDirection: "column",
+                        backgroundColor: 'white',
+                        borderRadius: '8px',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                        overflow: 'hidden' // For rounded corners
+                    }}>
+                        <AgentChat
+                            imageSrc={multimodal_input.type === 'image' ? multimodal_input.url : ''}
+                            imageSide={task_role === 'question_asker' ? 'incoming' : 'outgoing'}
+                            initialMessages={chatHistory}
+                            onSend={handleSend}
+                            lastResponseRef={lastResponseRef}
+                            firstResponseRef={firstResponseRef}
+                            loading={!isValidated || isSendingResponse}
+                            messageHtml={messageHtml}
+                            onMessageChange={(html, text) => { setMessageHtml(html); setMessageText(text); }}
+                        />
+                        {
+                            currentErrorAlert && (
+                                <Alert severity="error" sx={{ m: 2 }}>{currentErrorAlert}</Alert>
+                            )
+                        }
+                    </Box>
+                    <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleSend(messageText)}
+                            disabled={!isValidated || isSendingResponse}
+                            size="medium"
+                        >
+                            Submit Sample
+                        </Button>
+                    </Box>
                 </Box>
             </Box>
         </>
