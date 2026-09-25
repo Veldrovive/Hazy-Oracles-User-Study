@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, CircularProgress, Alert, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Slider, Tooltip, IconButton } from '@mui/material';
+import { Box, CircularProgress, Alert, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Tooltip, IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
+import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
+import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
+import SentimentNeutralIcon from '@mui/icons-material/SentimentNeutral';
+import SentimentSatisfiedIcon from '@mui/icons-material/SentimentSatisfied';
+import SentimentVerySatisfiedIcon from '@mui/icons-material/SentimentVerySatisfied';
 import { TaskInstructions } from './components/TaskInstructions';
 import { TargetQuestion } from './components/TargetQuestion';
 import { RatingForm } from './components/RatingForm';
@@ -175,7 +180,7 @@ type SampleProps = SampleData & {
 function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, intended_question, dialog_history, isValidated, hasReadAsker, hasReadAnswerer, loginId, password, setHasReadAsker, setHasReadAnswerer, handleLogout }: SampleProps) {
     const [ratings, setRatings] = useState<Record<string, number>>({});
     const [currentGuess, setCurrentGuess] = useState("");
-    const [confidenceScore, setConfidenceScore] = useState<number>(3);
+    const [confidenceScore, setConfidenceScore] = useState<number | null>(null);
 
     const [currentErrorAlert, setCurrentErrorAlert] = useState<string | undefined>();
 
@@ -186,6 +191,8 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
     const firstResponseRef = useRef<any>(null);
 
     const [isIntendedQuestionhovered, setIsIntendedQuestionHovered] = useState(false);
+    const [isCurrentGuessHovered, setIsCurrentGuessHovered] = useState(false);
+    const [isCurrentGuessFocused, setIsCurrentGuessFocused] = useState(false);
     const [showXarrow, setShowXarrow] = useState(false);
 
     const [showInstructionsModal, setShowInstructionsModal] = useState(
@@ -288,9 +295,15 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
             }
         }
 
-        if (task_role === 'question_asker' && !currentGuess.trim()) {
-            setCurrentErrorAlert('Please enter your current guess.');
-            return false;
+        if (task_role === 'question_asker') {
+            if (!currentGuess.trim()) {
+                setCurrentErrorAlert('Please enter your current guess.');
+                return false;
+            }
+            if (confidenceScore === null) {
+                setCurrentErrorAlert('Please select a confidence score.');
+                return false;
+            }
         }
 
         setCurrentErrorAlert(undefined);
@@ -382,6 +395,18 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                     curveness={0.4}
                 />
             }
+            {
+                (isCurrentGuessHovered || isCurrentGuessFocused) &&
+                <Xarrow
+                    end={firstResponseRef}
+                    endAnchor="auto"
+                    start="current-guess-box"
+                    startAnchor="auto"
+                    zIndex={100}
+                    color="red"
+                    curveness={0.4}
+                />
+            }
             <Box sx={{
                 width: '100vw',
                 height: '100vh',
@@ -424,52 +449,69 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                             task_role === 'question_asker' && (
                                 <Box sx={{ mt: 2, p: 2, bgcolor: 'white', borderRadius: 1, border: '1px solid #e0e0e0', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                                     <Typography variant="h6" gutterBottom>
-                                        Current Guess
+                                        Answer the original question
                                     </Typography>
                                     <TextField
+                                        id="current-guess-box"
                                         fullWidth
                                         size="small"
-                                        label="What is your guess for the intended question?"
+                                        label="What is your best guess for the answer to this original question?"
                                         value={currentGuess}
                                         onChange={(e) => setCurrentGuess(e.target.value)}
+                                        onMouseEnter={() => setIsCurrentGuessHovered(true)}
+                                        onMouseLeave={() => setIsCurrentGuessHovered(false)}
+                                        onFocus={() => setIsCurrentGuessFocused(true)}
+                                        onBlur={() => setIsCurrentGuessFocused(false)}
                                         sx={{ mb: 2 }}
                                     />
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                         <Typography variant="body1">
                                             Confidence Score (1-5)
                                         </Typography>
-                                        <Tooltip title="How confident are you that your current guess is the intended question?" placement="right">
+                                        <Tooltip title="How confident are you that you are correct?" placement="right">
                                             <IconButton size="small" sx={{ ml: 1, color: 'action.active' }}>
                                                 <InfoIcon fontSize="small" />
                                             </IconButton>
                                         </Tooltip>
                                     </Box>
-                                    <Box sx={{ px: 2 }}>
-                                        <Slider
+                                    <Box sx={{ width: '100%' }}>
+                                        <ToggleButtonGroup
                                             value={confidenceScore}
-                                            min={1}
-                                            max={5}
-                                            step={1}
-                                            marks={[
-                                                { value: 1, label: '1' },
-                                                { value: 2, label: '2' },
-                                                { value: 3, label: '3' },
-                                                { value: 4, label: '4' },
-                                                { value: 5, label: '5' },
-                                            ]}
-                                            onChange={(_, newValue) => setConfidenceScore(newValue as number)}
-                                            valueLabelDisplay="auto"
-                                            valueLabelFormat={(value) => {
-                                                const labels: Record<number, string> = {
-                                                    1: 'Not at all confident',
-                                                    2: 'Not very confident',
-                                                    3: 'Neutral',
-                                                    4: 'Very confident',
-                                                    5: 'Perfectly confident'
-                                                };
-                                                return labels[value] || value.toString();
+                                            exclusive
+                                            fullWidth
+                                            onChange={(_, newValue) => {
+                                                if (newValue !== null) {
+                                                    setConfidenceScore(newValue);
+                                                }
                                             }}
-                                        />
+                                            aria-label="confidence score"
+                                        >
+                                            <Tooltip title="Not at all confident" placement="top">
+                                                <ToggleButton value={1} aria-label="not at all confident">
+                                                    <SentimentVeryDissatisfiedIcon />
+                                                </ToggleButton>
+                                            </Tooltip>
+                                            <Tooltip title="Not very confident" placement="top">
+                                                <ToggleButton value={2} aria-label="not very confident">
+                                                    <SentimentDissatisfiedIcon />
+                                                </ToggleButton>
+                                            </Tooltip>
+                                            <Tooltip title="Neutral" placement="top">
+                                                <ToggleButton value={3} aria-label="neutral">
+                                                    <SentimentNeutralIcon />
+                                                </ToggleButton>
+                                            </Tooltip>
+                                            <Tooltip title="Very confident" placement="top">
+                                                <ToggleButton value={4} aria-label="very confident">
+                                                    <SentimentSatisfiedIcon />
+                                                </ToggleButton>
+                                            </Tooltip>
+                                            <Tooltip title="Perfectly confident" placement="top">
+                                                <ToggleButton value={5} aria-label="perfectly confident">
+                                                    <SentimentVerySatisfiedIcon />
+                                                </ToggleButton>
+                                            </Tooltip>
+                                        </ToggleButtonGroup>
                                     </Box>
                                 </Box>
                             )

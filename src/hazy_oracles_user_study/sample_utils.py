@@ -275,9 +275,6 @@ def select_sample_for_participant(db: Session, node_code_expansion_order: list[s
     next_expansion_index = conversation_root.next_expansion_index
     root_ambiguous_question = conversation_root.ambiguous_question
     root_unambiguous_question = conversation_root.unambiguous_question
-    root_multimodal_file_path = conversation_root.multimodal_file_path
-    original_dataset = conversation_root.original_dataset
-    original_dataset_sample_id = conversation_root.original_dataset_sample_id
 
     # step 7: Read all ancestors of the node id to expand using a recursive CTE
     next_expansion_node_code = node_code_expansion_order[next_expansion_index]

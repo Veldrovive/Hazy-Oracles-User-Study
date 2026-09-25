@@ -1,5 +1,10 @@
-import { Box, Typography, Slider, Tooltip, IconButton } from '@mui/material';
+import { Box, Typography, Tooltip, IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
+import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
+import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
+import SentimentNeutralIcon from '@mui/icons-material/SentimentNeutral';
+import SentimentSatisfiedIcon from '@mui/icons-material/SentimentSatisfied';
+import SentimentVerySatisfiedIcon from '@mui/icons-material/SentimentVerySatisfied';
 
 export interface RatingQuestion {
     id: string;
@@ -59,17 +64,44 @@ export function RatingForm({ title, questions, values, onChange, boxRef }: Ratin
                             </IconButton>
                         </Tooltip>
                     </Box>
-                    <Box sx={{ px: 2 }}>
-                        <Slider
-                            value={values[q.id] || 3}
-                            min={q.min || 1}
-                            max={q.max || 5}
-                            step={1}
-                            marks={q.marks || false}
-                            onChange={(_, newValue) => onChange(q.id, newValue as number)}
-                            valueLabelDisplay="auto"
-                            valueLabelFormat={(value) => valueLabelFormat(q, value)}
-                        />
+                    <Box sx={{ width: '100%' }}>
+                        <ToggleButtonGroup
+                            value={values[q.id] || null}
+                            exclusive
+                            fullWidth
+                            onChange={(_, newValue) => {
+                                if (newValue !== null) {
+                                    onChange(q.id, newValue as number);
+                                }
+                            }}
+                            aria-label={q.label}
+                        >
+                            <Tooltip title={valueLabelFormat(q, 1)} placement="top">
+                                <ToggleButton value={1} aria-label={valueLabelFormat(q, 1)}>
+                                    <SentimentVeryDissatisfiedIcon />
+                                </ToggleButton>
+                            </Tooltip>
+                            <Tooltip title={valueLabelFormat(q, 2)} placement="top">
+                                <ToggleButton value={2} aria-label={valueLabelFormat(q, 2)}>
+                                    <SentimentDissatisfiedIcon />
+                                </ToggleButton>
+                            </Tooltip>
+                            <Tooltip title={valueLabelFormat(q, 3)} placement="top">
+                                <ToggleButton value={3} aria-label={valueLabelFormat(q, 3)}>
+                                    <SentimentNeutralIcon />
+                                </ToggleButton>
+                            </Tooltip>
+                            <Tooltip title={valueLabelFormat(q, 4)} placement="top">
+                                <ToggleButton value={4} aria-label={valueLabelFormat(q, 4)}>
+                                    <SentimentSatisfiedIcon />
+                                </ToggleButton>
+                            </Tooltip>
+                            <Tooltip title={valueLabelFormat(q, 5)} placement="top">
+                                <ToggleButton value={5} aria-label={valueLabelFormat(q, 5)}>
+                                    <SentimentVerySatisfiedIcon />
+                                </ToggleButton>
+                            </Tooltip>
+                        </ToggleButtonGroup>
                     </Box>
                 </Box>
             ))}

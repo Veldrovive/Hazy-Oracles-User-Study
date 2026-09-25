@@ -68,13 +68,13 @@ export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstR
                                 }}>
                                     <Message.ImageContent src={imageSrc} width="100%"></Message.ImageContent>
                                 </Message>
-                                {initialMessages.slice(0, -1).map((msg, i) => (
-                                    <Message key={msg.id || i} model={msg} id={`msg-${i}`} />
+                                {initialMessages.map((msg, i) => (
+                                    <Message 
+                                        key={msg.id || i} 
+                                        model={msg} 
+                                        id={i === initialMessages.length - 1 && i !== 0 ? "last-message" : `msg-${i}`} 
+                                    />
                                 ))}
-                                <Message
-                                    model={initialMessages[initialMessages.length - 1]}
-                                    id="last-message"
-                                />
                                 {
                                     loading &&
                                     <Message model={{ direction: "outgoing", position: "single" }}>
