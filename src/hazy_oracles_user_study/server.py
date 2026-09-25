@@ -44,7 +44,11 @@ from hazy_oracles_user_study.sample_utils import (
     WrongUserError,
     UserExcludedError,
     NoSentSampleError,
-    SampleAlreadyReturnedError
+    SampleAlreadyReturnedError,
+    NoSamplesAvailableError,
+    UserEndedParticipationError,
+    MaxResponsesReachedError,
+    Depth1CapReachedError
 )
 
 db_manager = DatabaseManager(DATABASE_URL)
@@ -302,18 +306,41 @@ async def get_task_sample(request: TaskSampleRequest, session: Session = Depends
         )
     
     # 2. get sample
-    sample_return = select_sample_for_participant(
-        db=session,
-        node_code_expansion_order=EXPANSION_ORDER_BASE64,
-        user_unique_id=user.unique_id,
-        zipf_s=request.zipf_s
-    )
-    
-    if sample_return is None:
+    try:
+        sample_return = select_sample_for_participant(
+            db=session,
+            node_code_expansion_order=EXPANSION_ORDER_BASE64,
+            user_unique_id=user.unique_id,
+            zipf_s=request.zipf_s
+        )
+    except UserEndedParticipationError as e:
+        return TaskSampleResponseNoSample(
+            status="no_sample",
+            reason="ended_participation",
+            message=str(e)
+        )
+    except MaxResponsesReachedError as e:
+        return TaskSampleResponseNoSample(
+            status="no_sample",
+            reason="max_responses_reached",
+            message=str(e)
+        )
+    except Depth1CapReachedError as e:
+        return TaskSampleResponseNoSample(
+            status="no_sample",
+            reason="depth_1_cap_reached",
+            message=str(e)
+        )
+    except NoSamplesAvailableError as e:
         return TaskSampleResponseNoSample(
             status="no_sample",
             reason="no_samples_available",
-            message="No samples available at this time."
+            message=str(e)
+        )
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorResponse(status="error", message=str(e)).model_dump()
         )
         
     sample, node_code, conversation_root, parent_sample = sample_return

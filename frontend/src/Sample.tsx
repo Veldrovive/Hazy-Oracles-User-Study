@@ -131,7 +131,7 @@ function SampleWrapper() {
     if (noSampleReason) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
-                <Typography variant="h5" gutterBottom>Check back later</Typography>
+                <Typography variant="h5" gutterBottom>No sample</Typography>
                 <Typography>{noSampleReason}</Typography>
             </Box>
         )
@@ -332,7 +332,7 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
             }
 
             console.log("Sent response successfully");
-            window.location.reload(); 
+            window.location.reload();
             return true;
         } catch (e: any) {
             console.error(e);
@@ -421,12 +421,12 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                                     <Typography variant="h6" gutterBottom>
                                         Current Guess
                                     </Typography>
-                                    <TextField 
-                                        fullWidth 
+                                    <TextField
+                                        fullWidth
                                         size="small"
-                                        label="What is your guess for the intended question?" 
-                                        value={currentGuess} 
-                                        onChange={(e) => setCurrentGuess(e.target.value)} 
+                                        label="What is your guess for the intended question?"
+                                        value={currentGuess}
+                                        onChange={(e) => setCurrentGuess(e.target.value)}
                                         sx={{ mb: 2 }}
                                     />
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -469,10 +469,10 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                                 </Box>
                             )
                         }
-                        <Button 
-                            variant="outlined" 
-                            color="error" 
-                            onClick={handleLogout} 
+                        <Button
+                            variant="outlined"
+                            color="error"
+                            onClick={handleLogout}
                             sx={{ mt: 2 }}
                         >
                             Log Out

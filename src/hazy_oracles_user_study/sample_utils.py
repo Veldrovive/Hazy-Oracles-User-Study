@@ -1,6 +1,6 @@
 from dataclasses import Field
 from datetime import datetime, timedelta, timezone
-from sqlmodel import Session, select, col
+from sqlmodel import Session, select, col, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased
 import numpy as np
@@ -26,6 +26,7 @@ from hazy_oracles_user_study.definitions import (
     PHASE_1_QUALIFICATION_NUM_RESPONSES,
     MAX_AUTOMOD_FLAGS,
     MAX_TOTAL_RESPONSES,
+    MAX_DEPTH_1_SAMPLES_PER_USER,
     DEFAULT_ZIPF_S,
     LOCK_TIMEOUT_MINUTES
 )
@@ -210,11 +211,19 @@ class SampleReturn(NamedTuple):
     parent_sample: SampleResponse | None
     
 
-def select_sample_for_participant(db: Session, node_code_expansion_order: list[str], user_unique_id: str, zipf_s: float = DEFAULT_ZIPF_S) -> SampleReturn | None:
+def select_sample_for_participant(db: Session, node_code_expansion_order: list[str], user_unique_id: str, zipf_s: float = DEFAULT_ZIPF_S) -> SampleReturn:
     # step 0: Check if the user is eligible to receive another sample
     criteria = check_participant_criteria(db, user_unique_id)
     if criteria.is_excluded:
-        return None
+        if not criteria.exists:
+            raise UserNotFoundError("User not found.")
+        elif criteria.has_ended_participation:
+            raise UserEndedParticipationError("You have chosen to end your participation in the study.")
+        elif criteria.num_responses >= MAX_TOTAL_RESPONSES:
+            raise MaxResponsesReachedError("You have reached the maximum total number of responses for this study.")
+        else:
+            # Spam filtered
+            raise NoSamplesAvailableError("No samples available at this time.")
 
     # step 1: Get the ids of all trees that this person has not participated in
     participated_root_ids = db.exec(select(SampleResponse.root_id).where(SampleResponse.user_unique_id == user_unique_id)).all()
@@ -226,13 +235,30 @@ def select_sample_for_participant(db: Session, node_code_expansion_order: list[s
     locked_root_ids = set(root_id for root_id in locked_root_ids)
 
     # step 2.1: Get a list of the ids of all trees that have not reached the end of the expansion order list
-    unfinished_root_ids = db.exec(select(ConversationRoot.root_id, ConversationRoot.priority).where(ConversationRoot.is_completed == False)).all()
+    unfinished_root_ids = db.exec(select(ConversationRoot.root_id, ConversationRoot.priority, ConversationRoot.next_expansion_index).where(ConversationRoot.is_completed == False)).all()
+
+    # step 2.2: Check if user has exceeded the depth 1 limit
+    depth_1_count = db.exec(
+        select(func.count(SampleResponse.sample_id)).where(
+            SampleResponse.user_unique_id == user_unique_id,
+            SampleResponse.depth == 1
+        )
+    ).one()
 
     # step 3: Compute the subtraction of the unfinished_root_ids with the locked or already participated root ids
-    eligible_root_ids = [(root_id, priority) for root_id, priority in unfinished_root_ids if root_id not in locked_root_ids and root_id not in participated_root_ids]
+    eligible_root_ids_without_constraint = [(root_id, priority) for root_id, priority, _ in unfinished_root_ids if root_id not in locked_root_ids and root_id not in participated_root_ids]
+
+    if depth_1_count >= MAX_DEPTH_1_SAMPLES_PER_USER:
+        depth_1_indices = {i for i, code in enumerate(node_code_expansion_order) if len(code) == 1}
+        eligible_root_ids = [(root_id, priority) for root_id, priority, next_idx in unfinished_root_ids if root_id not in locked_root_ids and root_id not in participated_root_ids and next_idx not in depth_1_indices]
+        
+        if len(eligible_root_ids) == 0 and len(eligible_root_ids_without_constraint) > 0:
+            raise Depth1CapReachedError("You have reached the limit for starting new conversations right now. If you check back a bit later, more follow-up tasks should become available.")
+    else:
+        eligible_root_ids = eligible_root_ids_without_constraint
 
     if len(eligible_root_ids) == 0:
-        return None
+        raise NoSamplesAvailableError("No samples available at this time.")
 
     # step 4: Order these trees by their priority
     eligible_root_ids.sort(key=lambda x: x[1], reverse=True)
@@ -376,6 +402,18 @@ class UserExcludedError(Exception):
     pass
 
 class SampleAlreadyReturnedError(Exception):
+    pass
+
+class NoSamplesAvailableError(Exception):
+    pass
+
+class UserEndedParticipationError(Exception):
+    pass
+
+class MaxResponsesReachedError(Exception):
+    pass
+
+class Depth1CapReachedError(Exception):
     pass
     
 

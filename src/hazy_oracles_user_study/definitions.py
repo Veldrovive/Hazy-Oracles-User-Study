@@ -21,6 +21,7 @@ AVG_CONFIDENCE_SCORE_PRUNE_THRESHOLD = float(os.getenv("AVG_CONFIDENCE_SCORE_PRU
 PHASE_1_QUALIFICATION_NUM_RESPONSES = int(os.getenv("PHASE_1_QUALIFICATION_NUM_RESPONSES", 10))
 MAX_AUTOMOD_FLAGS = int(os.getenv("MAX_AUTOMOD_FLAGS", 2))
 MAX_TOTAL_RESPONSES = int(os.getenv("MAX_TOTAL_RESPONSES", 100))
+MAX_DEPTH_1_SAMPLES_PER_USER = int(os.getenv("MAX_DEPTH_1_SAMPLES_PER_USER", 2))
 
 DEFAULT_ZIPF_S = float(os.getenv("DEFAULT_ZIPF_S", 1.2))
 
@@ -45,6 +46,7 @@ print(f"Average confidence score prune threshold: {AVG_CONFIDENCE_SCORE_PRUNE_TH
 print(f"Phase 1 qualification num responses: {PHASE_1_QUALIFICATION_NUM_RESPONSES}")
 print(f"Max automod flags: {MAX_AUTOMOD_FLAGS}")
 print(f"Max total responses: {MAX_TOTAL_RESPONSES}")
+print(f"Max depth 1 samples per user: {MAX_DEPTH_1_SAMPLES_PER_USER}")
 print(f"Default Zipf s: {DEFAULT_ZIPF_S}")
 print(f"Automod toxicity threshold: {AUTOMOD_TOXICITY_THRESHOLD}")
 print(f"Automod severe toxicity threshold: {AUTOMOD_SEVERE_TOXICITY_THRESHOLD}")
