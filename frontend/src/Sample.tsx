@@ -23,7 +23,7 @@ import { useNavigate } from 'react-router-dom';
 
 export interface MultimodalInput {
     type: 'image' | 'text',
-    content: string
+    url: string
 }
 
 export interface DialogMessage {
@@ -274,20 +274,23 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
             return false;
         }
 
-        if (task_role === 'question_answerer') {
-            if (!ratings['relevance'] || !ratings['informativeness']) {
-                setCurrentErrorAlert('Please fill out all ratings before sending.');
-                return false;
+        if (dialog_history.length > 0) {
+            if (task_role === 'question_answerer') {
+                if (!ratings['relevance'] || !ratings['informativeness']) {
+                    setCurrentErrorAlert('Please fill out all ratings before sending.');
+                    return false;
+                }
+            } else if (task_role === 'question_asker') {
+                if (!ratings['helpfulness']) {
+                    setCurrentErrorAlert('Please fill out the helpfulness rating before sending.');
+                    return false;
+                }
             }
-        } else if (task_role === 'question_asker') {
-            if (!ratings['helpfulness']) {
-                setCurrentErrorAlert('Please fill out the helpfulness rating before sending.');
-                return false;
-            }
-            if (!currentGuess.trim()) {
-                setCurrentErrorAlert('Please enter your current guess.');
-                return false;
-            }
+        }
+
+        if (task_role === 'question_asker' && !currentGuess.trim()) {
+            setCurrentErrorAlert('Please enter your current guess.');
+            return false;
         }
 
         setCurrentErrorAlert(undefined);
@@ -356,7 +359,7 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                 </DialogActions>
             </Dialog>
 
-            {showXarrow && (
+            {showXarrow && dialog_history.length > 0 && (
                 <Xarrow
                     start='rating-box'
                     startAnchor={'auto'}
@@ -407,13 +410,15 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                                 : null
                         }
 
-                        <RatingForm
-                            title={task_role === 'question_asker' ? "Rate the previous answer" : "Rate the previous clarifying question"}
-                            questions={rating_questions}
-                            values={ratings}
-                            onChange={handleRatingChange}
-                            boxRef={ratingBoxRef}
-                        />
+                        {dialog_history.length > 0 && (
+                            <RatingForm
+                                title={task_role === 'question_asker' ? "Rate the previous answer" : "Rate the previous clarifying question"}
+                                questions={rating_questions}
+                                values={ratings}
+                                onChange={handleRatingChange}
+                                boxRef={ratingBoxRef}
+                            />
+                        )}
 
                         {
                             task_role === 'question_asker' && (

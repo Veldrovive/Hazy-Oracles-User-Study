@@ -21,6 +21,7 @@ function Consent() {
     const [, setHasConsented] = useLocalStorage('has_consented', false);
     const [isCheckboxChecked, setIsCheckboxChecked] = useState(false);
     const [fullName, setFullName] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
 
     const [numPages, setNumPages] = useState<number>();
@@ -49,19 +50,32 @@ function Consent() {
     };
 
     const handleSubmit = async () => {
-        if (isCheckboxChecked && fullName.trim() !== '') {
-            try {
-                await fetch('/api/v1/user/consent', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ login_id: loginId, password })
-                });
-            } catch (e) {
-                console.error(e);
-            }
-            setHasConsented(true);
-            navigate('/sample');
+        if (!hasReachedLastPage) {
+            setErrorMessage('Please read through all pages of the consent form.');
+            return;
         }
+        if (!isCheckboxChecked) {
+            setErrorMessage('Please consent to be part of the research.');
+            return;
+        }
+        if (fullName.trim() === '') {
+            setErrorMessage('Please enter your full name.');
+            return;
+        }
+        
+        setErrorMessage('');
+
+        try {
+            await fetch('/api/v1/user/consent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login_id: loginId, password })
+            });
+        } catch (e) {
+            console.error(e);
+        }
+        setHasConsented(true);
+        navigate('/sample');
     };
 
     if (!isValidated) {
@@ -80,75 +94,82 @@ function Consent() {
                 </Document>
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 4 }}>
-                <IconButton onClick={goToPrevPage} disabled={pageNumber <= 1}>
-                    <ArrowBackIosNewIcon fontSize="small" />
-                </IconButton>
-                <Typography>
-                    Page {pageNumber} of {numPages || '--'}
-                </Typography>
-                <IconButton onClick={goToNextPage} disabled={pageNumber >= (numPages || 1)}>
-                    <ArrowForwardIosIcon fontSize="small" />
-                </IconButton>
-            </Box>
+            {numPages !== undefined && (
+                <>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 4 }}>
+                        <IconButton onClick={goToPrevPage} disabled={pageNumber <= 1}>
+                            <ArrowBackIosNewIcon fontSize="small" />
+                        </IconButton>
+                        <Typography>
+                            Page {pageNumber} of {numPages || '--'}
+                        </Typography>
+                        <IconButton onClick={goToNextPage} disabled={pageNumber >= (numPages || 1)}>
+                            <ArrowForwardIosIcon fontSize="small" />
+                        </IconButton>
+                    </Box>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: '100%', maxWidth: 400 }}>
-                <FormControlLabel
-                    disabled={!hasReachedLastPage}
-                    control={
-                        <Checkbox
-                            checked={isCheckboxChecked}
-                            onChange={(e) => setIsCheckboxChecked(e.target.checked)}
-                            color="primary"
-                            sx={{
-                                color: '#ccc',
-                                '&.Mui-checked': {
-                                    color: '#1976d2',
-                                },
-                            }}
-                        />
-                    }
-                    label={<Typography variant="h5" sx={{ fontWeight: 400 }}>I consent to be part of this research.</Typography>}
-                />
-
-                <TextField
-                    disabled={!hasReachedLastPage}
-                    label="Full Name"
-                    variant="outlined"
-                    fullWidth
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                />
-
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-                    <Button
-                        variant="contained"
-                        onClick={handleSubmit}
-                        disabled={!hasReachedLastPage || !isCheckboxChecked || fullName.trim() === ''}
-                        disableElevation
-                        sx={{
-                            bgcolor: '#e6dbf9',
-                            color: '#000',
-                            textTransform: 'none',
-                            fontWeight: 600,
-                            px: 4,
-                            py: 1,
-                            minWidth: 100,
-                            height: 40,
-                            '&:hover': {
-                                bgcolor: '#d5c4f5',
-                            },
-                            '&.Mui-disabled': {
-                                bgcolor: '#e6dbf9',
-                                opacity: 0.7,
-                                color: '#000',
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: '100%', maxWidth: 400 }}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={isCheckboxChecked}
+                                    onChange={(e) => setIsCheckboxChecked(e.target.checked)}
+                                    color="primary"
+                                    sx={{
+                                        color: '#ccc',
+                                        '&.Mui-checked': {
+                                            color: '#1976d2',
+                                        },
+                                    }}
+                                />
                             }
-                        }}
-                    >
-                        Submit
-                    </Button>
-                </Box>
-            </Box>
+                            label={<Typography variant="h5" sx={{ fontWeight: 400 }}>I consent to be part of this research.</Typography>}
+                        />
+
+                        <TextField
+                            label="Full Name"
+                            variant="outlined"
+                            fullWidth
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                        />
+
+                        {errorMessage && (
+                            <Typography color="error" variant="body2" sx={{ width: '100%', textAlign: 'center', mt: 1 }}>
+                                {errorMessage}
+                            </Typography>
+                        )}
+
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+                            <Button
+                                variant="contained"
+                                onClick={handleSubmit}
+                                disableElevation
+                                sx={{
+                                    bgcolor: '#e6dbf9',
+                                    color: '#000',
+                                    textTransform: 'none',
+                                    fontWeight: 600,
+                                    px: 4,
+                                    py: 1,
+                                    minWidth: 100,
+                                    height: 40,
+                                    '&:hover': {
+                                        bgcolor: '#d5c4f5',
+                                    },
+                                    '&.Mui-disabled': {
+                                        bgcolor: '#e6dbf9',
+                                        opacity: 0.7,
+                                        color: '#000',
+                                    }
+                                }}
+                            >
+                                Submit
+                            </Button>
+                        </Box>
+                    </Box>
+                </>
+            )}
         </Container>
     );
 }

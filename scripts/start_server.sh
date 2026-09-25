@@ -16,7 +16,7 @@ echo "Mode: Semi-production (low volume)"
 # - Use a small number of workers (2-4) to handle concurrent requests without using too many resources
 # - Enable proxy headers to parse X-Forwarded-* headers properly when behind a proxy
 uv run uvicorn hazy_oracles_user_study.server:app \
-    --host 0.0.0.0 \
+    --host 127.0.0.1 \
     --port 8000 \
     --workers 1 \
     --proxy-headers

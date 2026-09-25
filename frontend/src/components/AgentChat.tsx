@@ -24,7 +24,7 @@ export interface AgentChatProps {
 export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstResponseRef, lastResponseRef, loading }: AgentChatProps) {
     const [msgInputValue, setMsgInputValue] = useState("");
 
-    const handleSendClick = async (innerHtml: string, textContent: string, innerText: string) => {
+    const handleSendClick = async (_innerHtml: string, textContent: string, _innerText: string) => {
         // If the API allows passing both, onSend can be awaited to see if it succeeded.
         const success = await onSend(textContent);
         if (success !== false) {

@@ -130,6 +130,7 @@ function Login() {
                         variant="outlined"
                         value={currentLoginId}
                         onChange={(e) => setCurrentLoginId(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                         fullWidth
                         disabled={isLoading}
                     />
@@ -139,6 +140,7 @@ function Login() {
                         variant="outlined"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                         fullWidth
                         disabled={isLoading}
                     />

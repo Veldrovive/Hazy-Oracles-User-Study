@@ -97,15 +97,15 @@ class TaskSampleResponseNoSample(BaseModel):
 # 4. /api/v1/task/response
 class QuestionAskerResponseData(BaseModel):
     response_type: Literal["question_asker"]
-    previous_answer_meaningful_score: int
+    previous_answer_meaningful_score: Optional[int] = None
     current_guess: str
     confidence_score: int
     next_question: str
 
 class QuestionAnswererResponseData(BaseModel):
     response_type: Literal["question_answerer"]
-    previous_question_relevant_score: int
-    previous_question_informative_score: int
+    previous_question_relevant_score: Optional[int] = None
+    previous_question_informative_score: Optional[int] = None
     answer: str
 
 class TaskResponseRequest(BaseModel):
