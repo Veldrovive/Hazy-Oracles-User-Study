@@ -35,6 +35,7 @@ from hazy_oracles_user_study.utils import generate_uuid
 from hazy_oracles_user_study.user_utils import add_user
 from hazy_oracles_user_study.sample_utils import (
     select_sample_for_participant,
+    get_locked_sample_for_participant,
     add_sent_sample,
     add_lock,
     add_root,
@@ -307,12 +308,16 @@ async def get_task_sample(request: TaskSampleRequest, session: Session = Depends
     
     # 2. get sample
     try:
-        sample_return = select_sample_for_participant(
-            db=session,
-            node_code_expansion_order=EXPANSION_ORDER_BASE64,
-            user_unique_id=user.unique_id,
-            zipf_s=request.zipf_s
-        )
+        is_new_sample = False
+        sample_return = get_locked_sample_for_participant(session, user.unique_id)
+        if not sample_return:
+            is_new_sample = True
+            sample_return = select_sample_for_participant(
+                db=session,
+                node_code_expansion_order=EXPANSION_ORDER_BASE64,
+                user_unique_id=user.unique_id,
+                zipf_s=request.zipf_s
+            )
     except UserEndedParticipationError as e:
         return TaskSampleResponseNoSample(
             status="no_sample",
@@ -346,7 +351,8 @@ async def get_task_sample(request: TaskSampleRequest, session: Session = Depends
     sample, node_code, conversation_root, parent_sample = sample_return
     
     # 3. Add as sent sample
-    add_sent_sample(db=session, sample_data=sample_return, unique_user_id=user.unique_id)
+    if is_new_sample:
+        add_sent_sample(db=session, sample_data=sample_return, unique_user_id=user.unique_id)
     
     # 4. Put a lock on the tree
     add_lock(db=session, root_id=conversation_root.root_id, user_unique_id=user.unique_id, timeout_minutes=LOCK_TIMEOUT_MINUTES)

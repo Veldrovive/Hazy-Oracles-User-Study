@@ -273,12 +273,19 @@ def select_sample_for_participant(db: Session, node_code_expansion_order: list[s
     assert conversation_root is not None
 
     next_expansion_index = conversation_root.next_expansion_index
+    next_expansion_node_code = node_code_expansion_order[next_expansion_index]
+
+    sample_return = _build_sample_return(db, selected_root_id, next_expansion_node_code)
+    db.commit()
+    return sample_return
+
+def _build_sample_return(db: Session, selected_root_id: str, next_expansion_node_code: str, assigned_sample_id: str = None) -> SampleReturn:
+    conversation_root = db.get(ConversationRoot, selected_root_id)
+    assert conversation_root is not None
+
     root_ambiguous_question = conversation_root.ambiguous_question
     root_unambiguous_question = conversation_root.unambiguous_question
 
-    # step 7: Read all ancestors of the node id to expand using a recursive CTE
-    next_expansion_node_code = node_code_expansion_order[next_expansion_index]
-    
     ancestor_samples: list[SampleResponse] = []
     if len(next_expansion_node_code) > 1:
         parent_node_code = next_expansion_node_code[:-1]
@@ -333,9 +340,11 @@ def select_sample_for_participant(db: Session, node_code_expansion_order: list[s
         parent_sample_type: SAMPLE_TYPE = parent_sample.sample_type
         next_sample_type = SAMPLE_TYPE.ASKER if parent_sample_type == SAMPLE_TYPE.ANSWERER else SAMPLE_TYPE.ANSWERER
 
+    sample_id = assigned_sample_id if assigned_sample_id else generate_uuid()
+
     if next_sample_type == SAMPLE_TYPE.ANSWERER:
         next_sample = QuestionAnswererSampleData(
-            sample_id = generate_uuid(),
+            sample_id = sample_id,
             task_role = "question_answerer",
             multimodal_input = MultimodalInputImage(
                 type = "image",
@@ -347,7 +356,7 @@ def select_sample_for_participant(db: Session, node_code_expansion_order: list[s
         )
     elif next_sample_type == SAMPLE_TYPE.ASKER:
         next_sample = QuestionAskerSampleData(
-            sample_id = generate_uuid(),
+            sample_id = sample_id,
             task_role = "question_asker",
             multimodal_input = MultimodalInputImage(
                 type = "image",
@@ -357,9 +366,26 @@ def select_sample_for_participant(db: Session, node_code_expansion_order: list[s
             dialog_history = dialog_history
         )
 
-    db.commit()
-
     return SampleReturn(sample=next_sample, node_code=next_expansion_node_code, conversation_root=conversation_root, parent_sample=parent_sample)
+
+def get_locked_sample_for_participant(db: Session, user_unique_id: str) -> SampleReturn | None:
+    remove_expired_locks(db)
+    lock = db.exec(select(TreeLock).where(TreeLock.user_unique_id == user_unique_id)).first()
+    if not lock:
+        return None
+        
+    sent_sample = db.exec(
+        select(SentSample).where(
+            SentSample.user_unique_id == user_unique_id,
+            SentSample.root_id == lock.root_id,
+            SentSample.is_returned == False
+        ).order_by(SentSample.timestamp.desc())
+    ).first()
+
+    if not sent_sample:
+        return None
+
+    return _build_sample_return(db, lock.root_id, sent_sample.intended_node_code, assigned_sample_id=sent_sample.sample_id)
     
 def add_sent_sample(db: Session, sample_data: SampleReturn, unique_user_id: str):
     """
