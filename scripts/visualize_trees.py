@@ -82,8 +82,6 @@ def visualize_tree(session, root: ConversationRoot, output_dir: Path):
             
             if sample.previous_question_relevant_score is not None:
                 meta_text += f"Prev Q Relevant: {sample.previous_question_relevant_score:.2f}<br/>"
-            if sample.previous_question_informative_score is not None:
-                meta_text += f"Prev Q Informative: {sample.previous_question_informative_score:.2f}<br/>"
                 
         elif sample.sample_type == SAMPLE_TYPE.SKIP:
             node_type_name = "Skip"

@@ -13,7 +13,7 @@ export const QUESTION_ASKER_INSTRUCTIONS = [
     "Receive clarifying questions from the assistant.",
     "Answer the questions to the best of your ability.",
     "Ask follow-up questions if the previous answers are not sufficient to make the question unambiguous.",
-    "Rate the assistant's response in terms of relevance and informativeness.",
+    "Rate the assistant's response in terms of relevance.",
 ];
 
 export const QUESTION_ANSWERER_DETAILED_INSTRUCTIONS_TITLE = "Detailed Instructions"
@@ -51,25 +51,6 @@ export const QUESTION_ANSWERER_RATING_QUESTIONS: RatingQuestion[] = [
             { value: 3, label: 'Neutral' },
             { value: 4, label: 'Very relevant' },
             { value: 5, label: 'Perfectly relevant' },
-        ]
-    },
-    {
-        id: "informativeness",
-        label: "Rate informativeness (1-5)",
-        details: "How much new, useful information does this question seek?",
-        marks: [
-            { value: 1, label: '1' },
-            { value: 2, label: '2' },
-            { value: 3, label: '3' },
-            { value: 4, label: '4' },
-            { value: 5, label: '5' },
-        ],
-        valueLabels: [
-            { value: 1, label: 'Not at all informative' },
-            { value: 2, label: 'Not very informative' },
-            { value: 3, label: 'Neutral' },
-            { value: 4, label: 'Very informative' },
-            { value: 5, label: 'Perfectly informative' },
         ]
     }
 ];

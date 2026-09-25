@@ -188,7 +188,6 @@ class TestServer:
             answerer_response_data = QuestionAnswererResponseData(
                 response_type="question_answerer",
                 previous_question_relevant_score=5,
-                previous_question_informative_score=5,
                 answer=f"Answer from user index {i}."
             )
             
@@ -216,7 +215,6 @@ class TestServer:
             answerer_response_data = QuestionAnswererResponseData(
                 response_type="question_answerer",
                 previous_question_relevant_score=5,
-                previous_question_informative_score=5,
                 answer=f"Answer from user index {user_idx}."
             )
             

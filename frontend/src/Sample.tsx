@@ -283,7 +283,7 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
 
         if (dialog_history.length > 0) {
             if (task_role === 'question_answerer') {
-                if (!ratings['relevance'] || !ratings['informativeness']) {
+                if (!ratings['relevance']) {
                     setCurrentErrorAlert('Please fill out all ratings before sending.');
                     return false;
                 }
@@ -323,7 +323,6 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
             response_data = {
                 response_type: 'question_answerer',
                 previous_question_relevant_score: ratings['relevance'],
-                previous_question_informative_score: ratings['informativeness'],
                 answer: res
             };
         }

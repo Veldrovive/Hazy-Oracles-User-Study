@@ -105,7 +105,6 @@ class QuestionAskerResponseData(BaseModel):
 class QuestionAnswererResponseData(BaseModel):
     response_type: Literal["question_answerer"]
     previous_question_relevant_score: Optional[int] = None
-    previous_question_informative_score: Optional[int] = None
     answer: str
 
 class TaskResponseRequest(BaseModel):

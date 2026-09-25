@@ -511,7 +511,6 @@ def process_returned_sample(db: Session, response: TaskResponseRequest, selected
 
             # Answerer Fields
             previous_question_relevant_score = response_data.previous_question_relevant_score,
-            previous_question_informative_score = response_data.previous_question_informative_score,
             answer = response_data.answer
         )
         response_content = response_data.answer

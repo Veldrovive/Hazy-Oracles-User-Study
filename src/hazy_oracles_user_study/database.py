@@ -70,7 +70,6 @@ class SampleResponse(SQLModel, table=True):
 
     # Relevant only for answerer (empty if skip or asker)
     previous_question_relevant_score: Optional[float] = None
-    previous_question_informative_score: Optional[float] = None
     answer: Optional[str] = None
 
 class ConversationRoot(SQLModel, table=True):
