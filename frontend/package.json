@@ -17,6 +17,8 @@
     "@mui/icons-material": "^9.4.0",
     "@mui/material": "^9.4.0",
     "@mui/x-chat": "^9.0.0-alpha.17",
+    "motion": "^13.4.4",
+    "nextstepjs": "^2.3.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-pdf": "^10.5.0",

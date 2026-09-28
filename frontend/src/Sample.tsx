@@ -12,6 +12,7 @@ import { TaskInstructions } from './components/TaskInstructions';
 import { TargetQuestion } from './components/TargetQuestion';
 import { RatingForm } from './components/RatingForm';
 import { AgentChat } from './components/AgentChat';
+import { useNextStep } from 'nextstepjs';
 import Xarrow from "react-xarrows";
 import {
     QUESTION_ANSWERER_INSTRUCTIONS,
@@ -185,6 +186,7 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
     const [confidenceScore, setConfidenceScore] = useState<number | null>(null);
     const [messageHtml, setMessageHtml] = useState("");
     const [messageText, setMessageText] = useState("");
+    const { startNextStep } = useNextStep();
 
 
     const [currentErrorAlert, setCurrentErrorAlert] = useState<string | undefined>();
@@ -201,10 +203,16 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
     const [isRatingFormHovered, setIsRatingFormHovered] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    const [showInstructionsModal, setShowInstructionsModal] = useState(
-        (task_role === 'question_asker' && !hasReadAsker) ||
-        (task_role === 'question_answerer' && !hasReadAnswerer)
-    );
+    const [showInstructionsModal, setShowInstructionsModal] = useState(false);
+
+    useEffect(() => {
+        if (task_role === 'question_asker' && !hasReadAsker) {
+            // setShowInstructionsModal(true);
+        } else if (task_role === 'question_answerer' && !hasReadAnswerer) {
+            // setShowInstructionsModal(true);
+        }
+        startNextStep('asker-tour');
+    }, [task_role])
 
     const handleReadInstructions = async () => {
         const endpoint = task_role === 'question_asker' ? '/api/v1/user/read_asker_instructions' : '/api/v1/user/read_answerer_instructions';
@@ -472,6 +480,7 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                                 onChange={handleRatingChange}
                                 boxRef={ratingBoxRef}
                                 setIsHovered={setIsRatingFormHovered}
+                                id={"rating-box"}
                             />
                         )}
 
