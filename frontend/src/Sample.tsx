@@ -22,7 +22,9 @@ import {
     QUESTION_ASKER_DETAILED_INSTRUCTIONS_TITLE,
     QUESTION_ASKER_DETAILED_INSTRUCTIONS_CONTENT,
     QUESTION_ANSWERER_RATING_QUESTIONS,
-    QUESTION_ASKER_RATING_QUESTIONS
+    QUESTION_ASKER_RATING_QUESTIONS,
+    DUMMY_ASKER_SAMPLE,
+    DUMMY_ANSWERER_SAMPLE
 } from './sampleData';
 import { useBoolean, useLocalStorage } from 'usehooks-ts';
 import { useNavigate } from 'react-router-dom';
@@ -181,16 +183,15 @@ function SampleWrapper() {
         navigate('/');
     };
 
-    const handleReadInstructions = async () => {
-        if (!sampleData) return;
-        const endpoint = sampleData.task_role === 'question_asker' ? '/api/v1/user/read_asker_instructions' : '/api/v1/user/read_answerer_instructions';
+    const markInstructionsRead = async (role: 'question_asker' | 'question_answerer') => {
+        const endpoint = role === 'question_asker' ? '/api/v1/user/read_asker_instructions' : '/api/v1/user/read_answerer_instructions';
         try {
             await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ login_id: loginId, password })
             });
-            if (sampleData.task_role === 'question_asker') {
+            if (role === 'question_asker') {
                 setHasReadAsker(true);
             } else {
                 setHasReadAnswerer(true);
@@ -199,6 +200,42 @@ function SampleWrapper() {
             console.error(e);
         }
     };
+
+    if (!hasReadAsker) {
+        return (
+            <Sample
+                key="dummy-asker"
+                {...DUMMY_ASKER_SAMPLE}
+                isValidated={true}
+                hasReadAsker={hasReadAsker}
+                hasReadAnswerer={hasReadAnswerer}
+                loginId={loginId}
+                password={password}
+                isTutorial={true}
+                onTourComplete={async () => { await markInstructionsRead('question_asker'); }}
+                handleLogout={handleLogout}
+                onSubmit={async () => { /* no-op during tutorial */ }}
+            />
+        )
+    }
+
+    if (!hasReadAnswerer) {
+        return (
+            <Sample
+                key="dummy-answerer"
+                {...DUMMY_ANSWERER_SAMPLE}
+                isValidated={true}
+                hasReadAsker={hasReadAsker}
+                hasReadAnswerer={hasReadAnswerer}
+                loginId={loginId}
+                password={password}
+                isTutorial={true}
+                onTourComplete={async () => { await markInstructionsRead('question_answerer'); }}
+                handleLogout={handleLogout}
+                onSubmit={async () => { /* no-op during tutorial */ }}
+            />
+        )
+    }
 
     return (
         <Sample
@@ -209,7 +246,6 @@ function SampleWrapper() {
             hasReadAnswerer={hasReadAnswerer}
             loginId={loginId}
             password={password}
-            onReadInstructions={handleReadInstructions}
             handleLogout={handleLogout}
             onSubmit={handleSubmit}
         />
@@ -223,18 +259,33 @@ export type SampleProps = SampleData & {
     loginId: string,
     password: string,
     isTutorial?: boolean,
-    onReadInstructions: () => Promise<void>,
+    onTourComplete?: () => Promise<void>,
     handleLogout: () => void,
     onSubmit: (responseData: any) => Promise<void>
 };
 
-export function Sample({ sample_id, task_role, isTutorial, multimodal_input, ambiguous_question, intended_question, dialog_history, isValidated, hasReadAsker, hasReadAnswerer, loginId, password, onReadInstructions, handleLogout, onSubmit }: SampleProps) {
+export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimodal_input, ambiguous_question, intended_question, dialog_history, isValidated, hasReadAsker, hasReadAnswerer, loginId: _loginId, password: _password, onTourComplete, handleLogout, onSubmit }: SampleProps) {
     const [ratings, setRatings] = useState<Record<string, number>>({});
     const [currentGuess, setCurrentGuess] = useState("");
     const [confidenceScore, setConfidenceScore] = useState<number | null>(null);
     const [messageHtml, setMessageHtml] = useState("");
     const [messageText, setMessageText] = useState("");
-    const { startNextStep } = useNextStep();
+    const { startNextStep, isNextStepVisible } = useNextStep();
+
+    const wasTourVisible = useRef(false);
+
+    useEffect(() => {
+        if (isTutorial) {
+            if (isNextStepVisible) {
+                wasTourVisible.current = true;
+            } else if (!isNextStepVisible && wasTourVisible.current) {
+                wasTourVisible.current = false;
+                if (onTourComplete) {
+                    onTourComplete();
+                }
+            }
+        }
+    }, [isTutorial, isNextStepVisible, onTourComplete]);
 
 
     const [currentErrorAlert, setCurrentErrorAlert] = useState<string | undefined>();
@@ -256,17 +307,16 @@ export function Sample({ sample_id, task_role, isTutorial, multimodal_input, amb
     useEffect(() => {
         if (isTutorial) {
             if (task_role === 'question_asker' && !hasReadAsker) {
-                // setShowInstructionsModal(true);
+                console.log("Starting asker tutorial");
+                startNextStep('asker-tour');
             } else if (task_role === 'question_answerer' && !hasReadAnswerer) {
-                // setShowInstructionsModal(true);
+                console.log("Starting answerer tutorial");
+                startNextStep('answerer-tour');
             }
-            console.log("Starting tutorial", task_role);
-            startNextStep('asker-tour');
         }
-    }, [task_role, isTutorial])
+    }, [task_role, isTutorial, hasReadAsker, hasReadAnswerer, startNextStep])
 
     const handleReadInstructionsClick = async () => {
-        await onReadInstructions();
         setShowInstructionsModal(false);
     };
 
@@ -605,6 +655,7 @@ export function Sample({ sample_id, task_role, isTutorial, multimodal_input, amb
                             loading={!isValidated || isSendingResponse}
                             messageHtml={messageHtml}
                             onMessageChange={(html, text) => { setMessageHtml(html); setMessageText(text); }}
+                            textPlaceholder={task_role === 'question_asker' ? 'Ask a follow up question...' : 'Answer the question...'}
                         />
                         {
                             currentErrorAlert && (
@@ -614,6 +665,7 @@ export function Sample({ sample_id, task_role, isTutorial, multimodal_input, amb
                     </Box>
                     <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end' }}>
                         <Button
+                            id="submit-button"
                             variant="contained"
                             color="primary"
                             onClick={() => handleSend(messageText)}

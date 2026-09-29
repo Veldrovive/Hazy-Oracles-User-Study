@@ -24,6 +24,7 @@ export function TaskInstructions({ instructions, modalTitle, modalContent }: Tas
     const { value: instructionModalOpen, setTrue: handleOpenModal, setFalse: handleCloseModal } = useBoolean(false);
     return (
         <Box
+            id="task-instructions"
             sx={{
                 p: 2,
                 mb: 2,
@@ -34,7 +35,7 @@ export function TaskInstructions({ instructions, modalTitle, modalContent }: Tas
         >
             <Typography variant="h6" gutterBottom>
                 Task Instructions
-                <IconButton onClick={handleOpenModal} size="small" sx={{ ml: 1, color: 'action.active' }}>
+                <IconButton id="detailed-instructions-button" onClick={handleOpenModal} size="small" sx={{ ml: 1, color: 'action.active' }}>
                     <InfoIcon fontSize="small" />
                 </IconButton>
             </Typography>

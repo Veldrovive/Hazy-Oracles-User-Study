@@ -2,7 +2,6 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { NextStepProvider, NextStep } from 'nextstepjs';
-import type { Tour } from 'nextstepjs';
 import './index.css'
 
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
@@ -43,25 +42,7 @@ const router = createBrowserRouter([
   }
 ])
 
-const steps: Tour[] = [
-  {
-    tour: "asker-tour",
-    steps: [
-      {
-        title: "Welcome",
-        content: "Let's get started with NextStep!",
-        selector: "#chat-box",
-      },
-      {
-        title: "Welcome",
-        content: "Let's get started with NextStep!",
-        selector: "#rating-box",
-        side: 'top',
-      },
-      // ... more steps
-    ]
-  }
-];
+import { steps } from './tours';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

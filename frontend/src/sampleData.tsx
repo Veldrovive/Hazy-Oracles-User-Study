@@ -76,37 +76,50 @@ export const QUESTION_ASKER_RATING_QUESTIONS: RatingQuestion[] = [
     }
 ]
 
-export const EXAMPLE_IMAGE_URL = "https://beentheredonethatwithkids.com/wp-content/uploads/2016/07/Virginia-Safari-Park-Zebra-in-Car-scaled.jpg";
+import type { SampleData } from './Sample';
 
-export const EXAMPLE_TARGET_QUESTION = "What is the precise location of the zebra relative to the red car?";
+export const DUMMY_ASKER_SAMPLE: SampleData = {
+    sample_id: 'dummy_asker',
+    task_role: 'question_asker',
+    multimodal_input: {
+        type: 'image',
+        url: 'https://beentheredonethatwithkids.com/wp-content/uploads/2016/07/Virginia-Safari-Park-Zebra-in-Car-scaled.jpg'
+    },
+    ambiguous_question: 'Where is the large white item?',
+    intended_question: 'What is the precise location of the zebra relative to the red car?',
+    dialog_history: [
+        {
+            role: 'question_asker',
+            text: 'Are you talking about the animal?'
+        },
+        {
+            role: 'question_answerer',
+            text: 'Yes.'
+        }
+    ]
+};
 
-export const EXAMPLE_CHAT_MESSAGES: any[] = [
-    {
-        id: 'msg1',
-        message: 'Where is the large white item?',
-        sender: 'User',
-        direction: 'outgoing',
-        position: 'single'
+export const DUMMY_ANSWERER_SAMPLE: SampleData = {
+    sample_id: 'dummy_answerer',
+    task_role: 'question_answerer',
+    multimodal_input: {
+        type: 'image',
+        url: 'https://beentheredonethatwithkids.com/wp-content/uploads/2016/07/Virginia-Safari-Park-Zebra-in-Car-scaled.jpg'
     },
-    {
-        id: 'msg2',
-        message: 'Which specific white item are you looking for?',
-        sender: 'Assistant',
-        direction: 'incoming',
-        position: 'single'
-    },
-    {
-        id: 'msg3',
-        message: 'The large one next to the car.',
-        sender: 'User',
-        direction: 'outgoing',
-        position: 'single'
-    },
-    {
-        id: 'msg4',
-        message: 'Are you referring to the zebra?',
-        sender: 'Assistant',
-        direction: 'incoming',
-        position: 'single'
-    },
-];
+    ambiguous_question: 'Where is the large white item?',
+    intended_question: 'What is the precise location of the zebra relative to the red car?',
+    dialog_history: [
+        {
+            role: 'question_asker',
+            text: 'Are you talking about the animal?'
+        },
+        {
+            role: 'question_answerer',
+            text: 'Yes.'
+        },
+        {
+            role: 'question_asker',
+            text: 'The one sticking it\'s head in the window?'
+        }
+    ]
+};

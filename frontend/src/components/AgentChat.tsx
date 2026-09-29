@@ -19,11 +19,12 @@ export interface AgentChatProps {
     firstResponseRef: React.RefObject<Element>;
     lastResponseRef: React.RefObject<Element>;
     loading: boolean;
+    textPlaceholder: string;
     messageHtml?: string;
     onMessageChange?: (html: string, text: string) => void;
 }
 
-export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstResponseRef, lastResponseRef, loading, messageHtml, onMessageChange }: AgentChatProps) {
+export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstResponseRef, lastResponseRef, loading, textPlaceholder, messageHtml: _messageHtml, onMessageChange }: AgentChatProps) {
     const [msgInputValue, setMsgInputValue] = useState("");
 
     const handleSendClick = async (_innerHtml: string, textContent: string, _innerText: string) => {
@@ -54,7 +55,7 @@ export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstR
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, width: '100%', bgcolor: 'white' }}>
-            <Box sx={{ flexGrow: 1, p: 0, display: 'flex', flexDirection: 'column', minHeight: 400 }}>
+            <Box id="chat-box" sx={{ flexGrow: 1, p: 0, display: 'flex', flexDirection: 'column', minHeight: 400 }}>
                 <div style={{ position: "relative", height: "100%", flexGrow: 1 }}>
                     <MainContainer>
                         <ChatContainer>
@@ -88,10 +89,11 @@ export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstR
                             </MessageList>
                             <MessageInput
                                 autoFocus
+                                id="chat-input"
                                 attachButton={false}
-                                placeholder="Type message here"
+                                placeholder={textPlaceholder}
                                 value={msgInputValue}
-                                onChange={(innerHtml, textContent, innerText) => {
+                                onChange={(innerHtml, textContent, _innerText) => {
                                     setMsgInputValue(innerHtml);
                                     if (onMessageChange) {
                                         onMessageChange(innerHtml, textContent);
