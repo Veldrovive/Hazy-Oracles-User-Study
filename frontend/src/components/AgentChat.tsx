@@ -19,9 +19,11 @@ export interface AgentChatProps {
     firstResponseRef: React.RefObject<Element>;
     lastResponseRef: React.RefObject<Element>;
     loading: boolean;
+    messageHtml?: string;
+    onMessageChange?: (html: string, text: string) => void;
 }
 
-export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstResponseRef, lastResponseRef, loading }: AgentChatProps) {
+export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstResponseRef, lastResponseRef, loading, messageHtml, onMessageChange }: AgentChatProps) {
     const [msgInputValue, setMsgInputValue] = useState("");
 
     const handleSendClick = async (_innerHtml: string, textContent: string, _innerText: string) => {
@@ -89,7 +91,12 @@ export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstR
                                 attachButton={false}
                                 placeholder="Type message here"
                                 value={msgInputValue}
-                                onChange={(innerHtml) => setMsgInputValue(innerHtml)}
+                                onChange={(innerHtml, textContent, innerText) => {
+                                    setMsgInputValue(innerHtml);
+                                    if (onMessageChange) {
+                                        onMessageChange(innerHtml, textContent);
+                                    }
+                                }}
                                 onSend={handleSendClick}
                                 disabled={loading}
                                 sendButton={false}
