@@ -66,6 +66,32 @@ function SampleWrapper() {
     const [hasReadAsker, setHasReadAsker] = useState(true);
     const [hasReadAnswerer, setHasReadAnswerer] = useState(true);
 
+    const fetchSample = async () => {
+        setIsLoading(true);
+        setNoSampleReason(null);
+        try {
+            const sampleRes = await fetch('/api/v1/task/sample', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login_id: loginId, password })
+            });
+
+            const sampleResData = await sampleRes.json();
+
+            if (sampleResData.status === 'no_sample') {
+                setNoSampleReason(sampleResData.message || 'No samples available at this time.');
+                setSampleData(null);
+            } else if (sampleResData.status === 'success') {
+                setSampleData(sampleResData.data);
+            }
+        } catch (e) {
+            console.error(e);
+            setNoSampleReason('Failed to fetch sample.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
         let isMounted = true;
         const load = async () => {
@@ -99,26 +125,7 @@ function SampleWrapper() {
                 setHasReadAsker(summaryData.data.has_read_asker_instructions);
                 setHasReadAnswerer(summaryData.data.has_read_answerer_instructions);
 
-                const sampleRes = await fetch('/api/v1/task/sample', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ login_id: loginId, password })
-                });
-
-                const sampleResData = await sampleRes.json();
-
-                if (!isMounted) return;
-
-                if (sampleResData.status === 'no_sample') {
-                    setNoSampleReason(sampleResData.message || 'No samples available at this time.');
-                    setIsLoading(false);
-                    return;
-                }
-
-                if (sampleResData.status === 'success') {
-                    setSampleData(sampleResData.data);
-                    setIsLoading(false);
-                }
+                await fetchSample();
             } catch (e) {
                 console.error(e);
             }
@@ -127,6 +134,26 @@ function SampleWrapper() {
         load();
         return () => { isMounted = false; };
     }, [loginId, password, navigate, setLoginId, setPassword, setHasConsented]);
+
+    const handleSubmit = async (response_data: any) => {
+        const apiRes = await fetch('/api/v1/task/response', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                login_id: loginId,
+                password: password,
+                sample_id: sampleData?.sample_id,
+                response_data: response_data
+            })
+        });
+
+        if (!apiRes.ok) {
+            const errData = await apiRes.json();
+            throw new Error(errData.detail?.message || 'Error submitting response.');
+        }
+
+        await fetchSample();
+    };
 
     if (isLoading) {
         return (
@@ -154,33 +181,54 @@ function SampleWrapper() {
         navigate('/');
     };
 
+    const handleReadInstructions = async () => {
+        if (!sampleData) return;
+        const endpoint = sampleData.task_role === 'question_asker' ? '/api/v1/user/read_asker_instructions' : '/api/v1/user/read_answerer_instructions';
+        try {
+            await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login_id: loginId, password })
+            });
+            if (sampleData.task_role === 'question_asker') {
+                setHasReadAsker(true);
+            } else {
+                setHasReadAnswerer(true);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     return (
         <Sample
+            key={sampleData.sample_id}
             {...sampleData}
             isValidated={true}
             hasReadAsker={hasReadAsker}
             hasReadAnswerer={hasReadAnswerer}
             loginId={loginId}
             password={password}
-            setHasReadAsker={setHasReadAsker}
-            setHasReadAnswerer={setHasReadAnswerer}
+            onReadInstructions={handleReadInstructions}
             handleLogout={handleLogout}
+            onSubmit={handleSubmit}
         />
     )
 }
 
-type SampleProps = SampleData & {
+export type SampleProps = SampleData & {
     isValidated: boolean,
     hasReadAsker: boolean,
     hasReadAnswerer: boolean,
     loginId: string,
     password: string,
-    setHasReadAsker: (val: boolean) => void,
-    setHasReadAnswerer: (val: boolean) => void,
-    handleLogout: () => void
+    isTutorial?: boolean,
+    onReadInstructions: () => Promise<void>,
+    handleLogout: () => void,
+    onSubmit: (responseData: any) => Promise<void>
 };
 
-function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, intended_question, dialog_history, isValidated, hasReadAsker, hasReadAnswerer, loginId, password, setHasReadAsker, setHasReadAnswerer, handleLogout }: SampleProps) {
+export function Sample({ sample_id, task_role, isTutorial, multimodal_input, ambiguous_question, intended_question, dialog_history, isValidated, hasReadAsker, hasReadAnswerer, loginId, password, onReadInstructions, handleLogout, onSubmit }: SampleProps) {
     const [ratings, setRatings] = useState<Record<string, number>>({});
     const [currentGuess, setCurrentGuess] = useState("");
     const [confidenceScore, setConfidenceScore] = useState<number | null>(null);
@@ -206,30 +254,19 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
     const [showInstructionsModal, setShowInstructionsModal] = useState(false);
 
     useEffect(() => {
-        if (task_role === 'question_asker' && !hasReadAsker) {
-            // setShowInstructionsModal(true);
-        } else if (task_role === 'question_answerer' && !hasReadAnswerer) {
-            // setShowInstructionsModal(true);
-        }
-        startNextStep('asker-tour');
-    }, [task_role])
-
-    const handleReadInstructions = async () => {
-        const endpoint = task_role === 'question_asker' ? '/api/v1/user/read_asker_instructions' : '/api/v1/user/read_answerer_instructions';
-        try {
-            await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ login_id: loginId, password })
-            });
-            if (task_role === 'question_asker') {
-                setHasReadAsker(true);
-            } else {
-                setHasReadAnswerer(true);
+        if (isTutorial) {
+            if (task_role === 'question_asker' && !hasReadAsker) {
+                // setShowInstructionsModal(true);
+            } else if (task_role === 'question_answerer' && !hasReadAnswerer) {
+                // setShowInstructionsModal(true);
             }
-        } catch (e) {
-            console.error(e);
+            console.log("Starting tutorial", task_role);
+            startNextStep('asker-tour');
         }
+    }, [task_role, isTutorial])
+
+    const handleReadInstructionsClick = async () => {
+        await onReadInstructions();
         setShowInstructionsModal(false);
     };
 
@@ -338,26 +375,7 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
         }
 
         try {
-            const apiRes = await fetch('/api/v1/task/response', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    login_id: loginId,
-                    password: password,
-                    sample_id: sample_id,
-                    response_data: response_data
-                })
-            });
-
-            if (!apiRes.ok) {
-                const errData = await apiRes.json();
-                setCurrentErrorAlert(errData.detail?.message || 'Error submitting response.');
-                setIsSendingResponseFalse();
-                return false;
-            }
-
-            console.log("Sent response successfully");
-            window.location.reload();
+            await onSubmit(response_data);
             return true;
         } catch (e: any) {
             console.error(e);
@@ -375,7 +393,7 @@ function Sample({ sample_id, task_role, multimodal_input, ambiguous_question, in
                     <Box sx={{ whiteSpace: 'pre-wrap', pt: 1 }}>{detailed_instructions_content}</Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleReadInstructions} variant="contained" color="primary">
+                    <Button onClick={handleReadInstructionsClick} variant="contained" color="primary">
                         I have read the instructions
                     </Button>
                 </DialogActions>
