@@ -5,6 +5,11 @@ export const steps: Tour[] = [
     tour: "asker-tour",
     steps: [
       {
+        title: "New Task: Create a Clarifying Question",
+        content: "You are about to see a new task. The main task is to create a clarifying question that will be useful in pinpointing whether you are correct about the answer to the original question. You will review the dialog, rate previous answers, provide your current guess, and formulate your next question.",
+        showControls: true
+      },
+      {
         title: "Review Dialog History",
         content: "First, you should review the dialog history to understand the context of the current conversation.",
         selector: "#chat-box",
@@ -58,6 +63,11 @@ export const steps: Tour[] = [
   {
     tour: "answerer-tour",
     steps: [
+      {
+        title: "New Task: Answer the Clarifying Question",
+        content: "You are about to see a new task. The main task is to use the hidden knowledge from the intended question to answer the clarifying question from the previous message. You will review the dialog, rate the previous question, and provide your answer.",
+        showControls: true
+      },
       {
         title: "Review Dialog History",
         content: "Review the dialog history.",

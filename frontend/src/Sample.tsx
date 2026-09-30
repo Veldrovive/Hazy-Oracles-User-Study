@@ -201,7 +201,7 @@ function SampleWrapper() {
         }
     };
 
-    if (!hasReadAsker) {
+    if (!hasReadAsker && sampleData.task_role === 'question_asker') {
         return (
             <Sample
                 key="dummy-asker"
@@ -219,7 +219,7 @@ function SampleWrapper() {
         )
     }
 
-    if (!hasReadAnswerer) {
+    if (!hasReadAnswerer && sampleData.task_role === 'question_answerer') {
         return (
             <Sample
                 key="dummy-answerer"
