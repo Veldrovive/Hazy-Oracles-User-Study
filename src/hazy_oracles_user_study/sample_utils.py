@@ -12,6 +12,7 @@ from hazy_oracles_user_study.database import (
     ModerationEvent,
     SampleResponse,
     ConversationRoot,
+    TreeCollectionState,
     SentSample,
     User,
     SampleResponse,
@@ -28,7 +29,8 @@ from hazy_oracles_user_study.definitions import (
     MAX_TOTAL_RESPONSES,
     MAX_DEPTH_1_SAMPLES_PER_USER,
     DEFAULT_ZIPF_S,
-    LOCK_TIMEOUT_MINUTES
+    LOCK_TIMEOUT_MINUTES,
+    COLLECTIONS
 )
 
 from hazy_oracles_user_study.server_models import (
@@ -41,14 +43,14 @@ from hazy_oracles_user_study.server_models import (
 
 moderator = ContentModerator()
 
-def add_lock(db: Session, root_id: str, user_unique_id: str, timeout_minutes: int = LOCK_TIMEOUT_MINUTES):
+def add_lock(db: Session, root_id: str, collection_id: str, user_unique_id: str, timeout_minutes: int = LOCK_TIMEOUT_MINUTES):
     """Creates or updates a lock for a specific tree."""
     expires_at = (datetime.now(timezone.utc) + timedelta(minutes=timeout_minutes)).replace(tzinfo=None)
     
     # Check if lock exists (even if expired) to overwrite
-    lock = db.get(TreeLock, root_id)
+    lock = db.get(TreeLock, (root_id, collection_id))
     if not lock:
-        lock = TreeLock(root_id=root_id, user_unique_id=user_unique_id, expires_at=expires_at)
+        lock = TreeLock(root_id=root_id, collection_id=collection_id, user_unique_id=user_unique_id, expires_at=expires_at)
         db.add(lock)
     else:
         lock.user_unique_id = user_unique_id
@@ -56,9 +58,9 @@ def add_lock(db: Session, root_id: str, user_unique_id: str, timeout_minutes: in
         
     db.commit()
 
-def remove_lock(db: Session, root_id: str, user_unique_id: str):
+def remove_lock(db: Session, root_id: str, collection_id: str, user_unique_id: str):
     """Removes a lock if it belongs to the user."""
-    lock = db.get(TreeLock, root_id)
+    lock = db.get(TreeLock, (root_id, collection_id))
     if lock and lock.user_unique_id == user_unique_id:
         db.delete(lock)
         db.commit()
@@ -72,9 +74,9 @@ def remove_expired_locks(db: Session):
         db.delete(lock)
     db.commit()
 
-def is_locked(db: Session, root_id: str) -> bool:
+def is_locked(db: Session, root_id: str, collection_id: str) -> bool:
     """Checks if an active lock exists. Cleans up if it is expired."""
-    lock = db.get(TreeLock, root_id)
+    lock = db.get(TreeLock, (root_id, collection_id))
     if not lock:
         return False
         
@@ -194,8 +196,6 @@ def add_root(
         multimodal_file_path = multimodal_file_path,
         original_dataset = original_dataset,
         original_dataset_sample_id = original_dataset_sample_id,
-        next_expansion_index = 0,
-        is_completed = False,
     )
     try:
         db.add(root)
@@ -209,10 +209,10 @@ class SampleReturn(NamedTuple):
     node_code: str
     conversation_root: ConversationRoot
     parent_sample: SampleResponse | None
+    collection_id: str
     
 
 def select_sample_for_participant(db: Session, node_code_expansion_order: list[str], user_unique_id: str, zipf_s: float = DEFAULT_ZIPF_S) -> SampleReturn:
-    # step 0: Check if the user is eligible to receive another sample
     criteria = check_participant_criteria(db, user_unique_id)
     if criteria.is_excluded:
         if not criteria.exists:
@@ -222,64 +222,97 @@ def select_sample_for_participant(db: Session, node_code_expansion_order: list[s
         elif criteria.num_responses >= MAX_TOTAL_RESPONSES:
             raise MaxResponsesReachedError("You have reached the maximum total number of responses for this study.")
         else:
-            # Spam filtered
             raise NoSamplesAvailableError("No samples available at this time.")
 
-    # step 1: Get the ids of all trees that this person has not participated in
     participated_root_ids = db.exec(select(SampleResponse.root_id).where(SampleResponse.user_unique_id == user_unique_id)).all()
-    participated_root_ids = set(root_id for root_id in participated_root_ids)
+    participated_root_ids = set(participated_root_ids)
 
-    # step 2: Get a list of the ids of all trees that are currently locked
     remove_expired_locks(db)
-    locked_root_ids = db.exec(select(TreeLock.root_id)).all()
-    locked_root_ids = set(root_id for root_id in locked_root_ids)
+    locked_roots = db.exec(select(TreeLock.root_id, TreeLock.collection_id)).all()
+    locked_collection_roots = set((r, c) for r, c in locked_roots)
 
-    # step 2.1: Get a list of the ids of all trees that have not reached the end of the expansion order list
-    unfinished_root_ids = db.exec(select(ConversationRoot.root_id, ConversationRoot.priority, ConversationRoot.next_expansion_index).where(ConversationRoot.is_completed == False)).all()
-
-    # step 2.2: Check if user has exceeded the depth 1 limit
     depth_1_count = db.exec(
         select(func.count(SampleResponse.sample_id)).where(
             SampleResponse.user_unique_id == user_unique_id,
             SampleResponse.depth == 1
         )
     ).one()
+    depth_1_capped = depth_1_count >= MAX_DEPTH_1_SAMPLES_PER_USER
 
-    # step 3: Compute the subtraction of the unfinished_root_ids with the locked or already participated root ids
-    eligible_root_ids_without_constraint = [(root_id, priority) for root_id, priority, _ in unfinished_root_ids if root_id not in locked_root_ids and root_id not in participated_root_ids]
+    eligible_collections = {}
 
-    if depth_1_count >= MAX_DEPTH_1_SAMPLES_PER_USER:
-        depth_1_indices = {i for i, code in enumerate(node_code_expansion_order) if len(code) == 1}
-        eligible_root_ids = [(root_id, priority) for root_id, priority, next_idx in unfinished_root_ids if root_id not in locked_root_ids and root_id not in participated_root_ids and next_idx not in depth_1_indices]
+    for collection_id, config in COLLECTIONS.items():
+        expansion_order = config.get("expansion_order", [])
+        if not expansion_order:
+            continue
+            
+        unfinished_roots = db.exec(
+            select(ConversationRoot.root_id, ConversationRoot.priority, TreeCollectionState)
+            .join(
+                TreeCollectionState, 
+                (TreeCollectionState.root_id == ConversationRoot.root_id) & (TreeCollectionState.collection_id == collection_id), 
+                isouter=True
+            )
+        ).all()
         
-        if len(eligible_root_ids) == 0 and len(eligible_root_ids_without_constraint) > 0:
-            raise Depth1CapReachedError("You have reached the limit for starting new conversations right now. If you check back a bit later, more follow-up tasks should become available.")
-    else:
-        eligible_root_ids = eligible_root_ids_without_constraint
+        eligible_roots = []
+        for root_id, priority, state in unfinished_roots:
+            if root_id in participated_root_ids: continue
+            if (root_id, collection_id) in locked_collection_roots: continue
+            
+            if state and state.is_completed: continue
+            idx = state.next_expansion_index if state else 0
+            
+            if idx >= len(expansion_order): continue
+            
+            node_code = expansion_order[idx]
+            
+            if len(node_code) % 2 == 1:
+                required_role = config.get("asker_role")
+            else:
+                required_role = config.get("answerer_role")
+                
+            if required_role != "human": continue
+            
+            if depth_1_capped and len(node_code) == 1: continue
+            
+            eligible_roots.append((root_id, priority, node_code))
+            
+        if eligible_roots:
+            completed_roots = db.exec(select(func.count(TreeCollectionState.root_id)).where(TreeCollectionState.collection_id == collection_id, TreeCollectionState.is_completed == True)).one()
+            total_roots = len(unfinished_roots) # Every root counts, even if it has no TreeCollectionState
+            completion_rate = completed_roots / max(1, total_roots)
+            
+            eligible_collections[collection_id] = {
+                "roots": eligible_roots,
+                "completion_rate": completion_rate
+            }
 
-    if len(eligible_root_ids) == 0:
+    if not eligible_collections:
+        # Check if they were excluded because of depth 1 cap
+        if depth_1_capped:
+            raise Depth1CapReachedError("You have reached the limit for starting new conversations right now. If you check back a bit later, more follow-up tasks should become available.")
         raise NoSamplesAvailableError("No samples available at this time.")
 
-    # step 4: Order these trees by their priority
-    eligible_root_ids.sort(key=lambda x: x[1], reverse=True)
+    # Find the minimum completion rate
+    min_rate = min(info["completion_rate"] for info in eligible_collections.values())
+    best_collections = [cid for cid, info in eligible_collections.items() if info["completion_rate"] == min_rate]
+    
+    # Pick a collection randomly if tied
+    selected_collection_id = np.random.choice(best_collections)
+    eligible_roots = eligible_collections[selected_collection_id]["roots"]
+    
+    # Sort eligible roots by priority
+    eligible_roots.sort(key=lambda x: x[1], reverse=True)
+    probabilities = get_zipf_pmf(N=len(eligible_roots), s=zipf_s)
+    sampled_index = np.random.choice(np.arange(len(eligible_roots)), p=probabilities)
+    selected_root_id, _, next_expansion_node_code = eligible_roots[sampled_index]
 
-    # step 5: Randomly select a tree based on a bias toward high ranked trees
-    probabilities = get_zipf_pmf(N=len(eligible_root_ids), s=zipf_s)
-    sampled_index = np.random.choice(np.arange(len(eligible_root_ids)), p=probabilities)
-    selected_root_id = eligible_root_ids[sampled_index][0]
-
-    # step 6: Read the next_expansion_index and get the corresponding node id
-    conversation_root = db.get(ConversationRoot, selected_root_id)
-    assert conversation_root is not None
-
-    next_expansion_index = conversation_root.next_expansion_index
-    next_expansion_node_code = node_code_expansion_order[next_expansion_index]
-
-    sample_return = _build_sample_return(db, selected_root_id, next_expansion_node_code)
+    sample_return = _build_sample_return(db, selected_root_id, selected_collection_id, next_expansion_node_code)
     db.commit()
     return sample_return
 
-def _build_sample_return(db: Session, selected_root_id: str, next_expansion_node_code: str, assigned_sample_id: str = None) -> SampleReturn:
+def _build_sample_return(db: Session, selected_root_id: str, collection_id: str, next_expansion_node_code: str, assigned_sample_id: str = None) -> SampleReturn:
     conversation_root = db.get(ConversationRoot, selected_root_id)
     assert conversation_root is not None
 
@@ -292,6 +325,7 @@ def _build_sample_return(db: Session, selected_root_id: str, next_expansion_node
         
         base_query = select(SampleResponse).where(
             SampleResponse.root_id == selected_root_id,
+            SampleResponse.collection_id == collection_id,
             SampleResponse.node_code == parent_node_code,
             SampleResponse.moderation_status == MODERATION_ACTION.CLEARED
         ).cte(name="ancestor_samples", recursive=True)
@@ -366,7 +400,7 @@ def _build_sample_return(db: Session, selected_root_id: str, next_expansion_node
             dialog_history = dialog_history
         )
 
-    return SampleReturn(sample=next_sample, node_code=next_expansion_node_code, conversation_root=conversation_root, parent_sample=parent_sample)
+    return SampleReturn(sample=next_sample, node_code=next_expansion_node_code, conversation_root=conversation_root, parent_sample=parent_sample, collection_id=collection_id)
 
 def get_locked_sample_for_participant(db: Session, user_unique_id: str) -> SampleReturn | None:
     remove_expired_locks(db)
@@ -378,6 +412,7 @@ def get_locked_sample_for_participant(db: Session, user_unique_id: str) -> Sampl
         select(SentSample).where(
             SentSample.user_unique_id == user_unique_id,
             SentSample.root_id == lock.root_id,
+            SentSample.collection_id == lock.collection_id,
             SentSample.is_returned == False
         ).order_by(SentSample.timestamp.desc())
     ).first()
@@ -385,7 +420,7 @@ def get_locked_sample_for_participant(db: Session, user_unique_id: str) -> Sampl
     if not sent_sample:
         return None
 
-    return _build_sample_return(db, lock.root_id, sent_sample.intended_node_code, assigned_sample_id=sent_sample.sample_id)
+    return _build_sample_return(db, lock.root_id, lock.collection_id, sent_sample.intended_node_code, assigned_sample_id=sent_sample.sample_id)
     
 def add_sent_sample(db: Session, sample_data: SampleReturn, unique_user_id: str):
     """
@@ -398,6 +433,7 @@ def add_sent_sample(db: Session, sample_data: SampleReturn, unique_user_id: str)
         user_unique_id=unique_user_id,
         parent_id=parent_id,
         root_id=sample_data.conversation_root.root_id,
+        collection_id=sample_data.collection_id,
         timestamp=datetime.now(timezone.utc)
     )
     try:
@@ -441,22 +477,11 @@ class Depth1CapReachedError(Exception):
     
 
 def process_returned_sample(db: Session, response: TaskResponseRequest, selected_expansion_order: list[str]) -> bool:
-    """
-    Called once the user has entered their response. Does checks to make sure this sample should be used.
-    Checks whether we have a sent sample in the database that corresponds with this incoming sample.
-    Runs automod.
-    Checks whether another node for this root with this node id has already come in.
-    If we pass, adds this sample and increments the conversation root's next_expansion_index.
-    And removes the lock.
-    """
-
-    # First, we check if this response actually corresponds to the sample that was sent to the user.
     incoming_sample_id = response.sample_id
     sent_sample = get_sent_sample(db, sample_id=incoming_sample_id)
     if sent_sample is None:
         raise NoSentSampleError(f"No sent sample found for the given sample_id: {incoming_sample_id}")
 
-    # We also need to check if the sent sample was actually sent to the participant that is returning it
     criteria = check_participant_criteria(db, user_login_id=response.login_id, user_password=response.password)
     user = criteria.user
 
@@ -465,44 +490,45 @@ def process_returned_sample(db: Session, response: TaskResponseRequest, selected
     if user.unique_id != sent_sample.user_unique_id:
         raise WrongUserError(f"The user that is returning the sample (unique_id: {user.unique_id}) is not the user that the sample was sent to (unique_id: {sent_sample.user_unique_id})")
 
-    # At this point, we remove the lock if it exists no matter what
-    remove_lock(db, root_id=sent_sample.root_id, user_unique_id=user.unique_id)
+    remove_lock(db, root_id=sent_sample.root_id, collection_id=sent_sample.collection_id, user_unique_id=user.unique_id)
     if criteria.is_excluded:
         raise UserExcludedError(f"User {user.login_id} is excluded from the study")
 
     if sent_sample.is_returned:
         raise SampleAlreadyReturnedError(f"Sample with id {incoming_sample_id} has already been returned")
 
-    # Update the sent sample to reflect that it has been returned
     sent_sample.is_returned = True
     db.add(sent_sample)
 
-    # Track user response count
     user.num_responses_given += 1
     db.add(user)
 
-    # Check if the expected node code is the same as the node code that the root currently wants expanded
-    # If the lock expired and somebody else submitted in the meantime, there might already be a sample for that node code
-    conversation_root = db.get(ConversationRoot, sent_sample.root_id)
-    if conversation_root is None:
-        raise ValueError(f"Conversation root not found for the given root_id: {sent_sample.root_id}")
+    collection_id = sent_sample.collection_id
+    collection_state = db.get(TreeCollectionState, (sent_sample.root_id, collection_id))
+    if collection_state is None:
+        collection_state = TreeCollectionState(
+            root_id=sent_sample.root_id, 
+            collection_id=collection_id, 
+            next_expansion_index=0, 
+            is_completed=False
+        )
 
-    root_next_expansion_index = conversation_root.next_expansion_index
-    if conversation_root.is_completed or root_next_expansion_index >= len(selected_expansion_order):
-        # Conversation root has already reached the end of its expansion order
+    col_config = COLLECTIONS.get(collection_id)
+    actual_expansion_order = col_config.get("expansion_order") if col_config else selected_expansion_order
+
+    root_next_expansion_index = collection_state.next_expansion_index
+    if collection_state.is_completed or root_next_expansion_index >= len(actual_expansion_order):
         db.commit()
         return False
 
-    root_next_node_code = selected_expansion_order[root_next_expansion_index]
+    root_next_node_code = actual_expansion_order[root_next_expansion_index]
     sent_sample_node_code = sent_sample.intended_node_code
     if root_next_node_code != sent_sample_node_code:
-        # This isn't an error, but it means that this sample is not going to be shown to anybody else
         db.commit()
         return False
     
     depth = len(sent_sample_node_code)
 
-    # Add the new sample into the database
     response_data = response.response_data
     if response_data.response_type == "question_asker":
         returned_sample = SampleResponse(
@@ -511,12 +537,11 @@ def process_returned_sample(db: Session, response: TaskResponseRequest, selected
             user_unique_id=user.unique_id,
             parent_sample_id=sent_sample.parent_id,
             root_id=sent_sample.root_id,
+            collection_id=collection_id,
             depth=depth,
             timestamp=datetime.now(timezone.utc),
             participant_type="human",
             sample_type=SAMPLE_TYPE.ASKER,
-            
-            # Asker Fields
             previous_answer_meaningful_score = response_data.previous_answer_meaningful_score,
             current_guess = response_data.current_guess,
             current_guess_confidence_score = response_data.confidence_score,
@@ -530,12 +555,11 @@ def process_returned_sample(db: Session, response: TaskResponseRequest, selected
             user_unique_id=user.unique_id,
             parent_sample_id=sent_sample.parent_id,
             root_id=sent_sample.root_id,
+            collection_id=collection_id,
             depth=depth,
             timestamp=datetime.now(timezone.utc),
             participant_type="human",
             sample_type=SAMPLE_TYPE.ANSWERER,
-
-            # Answerer Fields
             previous_question_relevant_score = response_data.previous_question_relevant_score,
             answer = response_data.answer
         )
@@ -543,10 +567,8 @@ def process_returned_sample(db: Session, response: TaskResponseRequest, selected
     else:
         raise ValueError(f"Invalid response type: {response_data.response_type}")
 
-    # The automod tells us whether we should use this response
     moderation_report = moderator.evaluate_text(response_content, fast_fail=False)
     if moderation_report.action != "pass":
-        # Then we don't place this as a possible response for follow up
         returned_sample.moderation_status = MODERATION_ACTION.PLACED_ON_HOLD
         moderation_event = ModerationEvent(
             event_id = generate_uuid(),
@@ -566,7 +588,6 @@ def process_returned_sample(db: Session, response: TaskResponseRequest, selected
         db.commit()
         return False
     else:
-        # Then we can simply add this as the next node and increment the expansion index
         returned_sample.moderation_status = MODERATION_ACTION.CLEARED
         moderation_event = ModerationEvent(
             event_id = generate_uuid(),
@@ -579,10 +600,10 @@ def process_returned_sample(db: Session, response: TaskResponseRequest, selected
             automod_scores = moderation_report.detoxify_scores,
             human_notes = None
         )
-        conversation_root.next_expansion_index += 1
-        if conversation_root.next_expansion_index >= len(selected_expansion_order):
-            conversation_root.is_completed = True
-        db.add(conversation_root)
+        collection_state.next_expansion_index += 1
+        if collection_state.next_expansion_index >= len(actual_expansion_order):
+            collection_state.is_completed = True
+        db.add(collection_state)
         db.add(moderation_event)
         db.add(returned_sample)
         db.commit()

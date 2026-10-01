@@ -11,7 +11,7 @@ from hazy_oracles_user_study.definitions import *
 from hazy_oracles_user_study.database import DatabaseManager
 from hazy_oracles_user_study.database import User
 from hazy_oracles_user_study.database import (
-    SentSample, SampleResponse, ConversationRoot, ModerationEvent
+    SentSample, SampleResponse, ConversationRoot, ModerationEvent, TreeCollectionState, TreeLock
 )
 from sqlmodel import Session, select
 
@@ -29,7 +29,10 @@ from hazy_oracles_user_study.server_models import (
     TaskSampleResponseNoSample,
     TaskResponseRequest,
     TaskResponseSuccess,
-    ErrorResponse
+    ErrorResponse,
+    AITaskSamplesResponse,
+    AISampleData,
+    AITaskResponseRequest
 )
 from hazy_oracles_user_study.utils import generate_uuid
 from hazy_oracles_user_study.user_utils import add_user
@@ -49,7 +52,9 @@ from hazy_oracles_user_study.sample_utils import (
     NoSamplesAvailableError,
     UserEndedParticipationError,
     MaxResponsesReachedError,
-    Depth1CapReachedError
+    Depth1CapReachedError,
+    _build_sample_return,
+    is_locked
 )
 
 db_manager = DatabaseManager(DATABASE_URL)
@@ -77,19 +82,18 @@ async def lifespan(app: FastAPI):
                 
                 # Check if root already exists
                 existing_root = session.get(ConversationRoot, root.root_id)
-                if existing_root:
-                    continue
-                    
-                add_root(
-                    session,
-                    root_id=root.root_id,
-                    ambiguous_question=root.ambiguous_question,
-                    priority=root.priority,
-                    unambiguous_question=root.unambiguous_question,
-                    multimodal_file_path=root.multimodal_file_path,
-                    original_dataset=root.original_dataset,
-                    original_dataset_sample_id=root.original_dataset_sample_id,
-                )
+                if not existing_root:
+                    add_root(
+                        session,
+                        root_id=root.root_id,
+                        ambiguous_question=root.ambiguous_question,
+                        priority=root.priority,
+                        unambiguous_question=root.unambiguous_question,
+                        multimodal_file_path=root.multimodal_file_path,
+                        original_dataset=root.original_dataset,
+                        original_dataset_sample_id=root.original_dataset_sample_id,
+                    )
+            session.commit()
     yield
 
 app = FastAPI(
@@ -347,15 +351,14 @@ async def get_task_sample(request: TaskSampleRequest, session: Session = Depends
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=ErrorResponse(status="error", message=str(e)).model_dump()
         )
-        
-    sample, node_code, conversation_root, parent_sample = sample_return
+    sample, node_code, conversation_root, parent_sample, collection_id = sample_return
     
     # 3. Add as sent sample
     if is_new_sample:
         add_sent_sample(db=session, sample_data=sample_return, unique_user_id=user.unique_id)
     
     # 4. Put a lock on the tree
-    add_lock(db=session, root_id=conversation_root.root_id, user_unique_id=user.unique_id, timeout_minutes=LOCK_TIMEOUT_MINUTES)
+    add_lock(db=session, root_id=conversation_root.root_id, collection_id=sample_return.collection_id, user_unique_id=user.unique_id, timeout_minutes=LOCK_TIMEOUT_MINUTES)
     
     return TaskSampleResponseSuccess(
         status="success",
@@ -421,6 +424,196 @@ async def get_image(id: str, session: Session = Depends(db_manager.get_session))
         )
     
     return FileResponse(file_path)
+
+from fastapi import Header
+
+@app.get(
+    "/api/v1/ai/task/samples",
+    response_model=AITaskSamplesResponse,
+    responses={
+        401: {"model": ErrorResponse, "description": "Invalid API key."}
+    }
+)
+async def ai_get_task_samples(
+    collection_id: str,
+    ai_name: str,
+    ai_role: str,
+    session: Session = Depends(db_manager.get_session),
+    x_api_key: str = Header(None)
+):
+    if API_KEY != x_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorResponse(status="error", message="Invalid API key.").model_dump()
+        )
+
+    col_config = COLLECTIONS.get(collection_id)
+    if not col_config:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorResponse(status="error", message="Invalid collection_id.").model_dump()
+        )
+        
+    expansion_order = col_config.get("expansion_order", [])
+    
+    unfinished_roots = session.exec(
+        select(ConversationRoot.root_id, TreeCollectionState)
+        .join(
+            TreeCollectionState, 
+            (TreeCollectionState.root_id == ConversationRoot.root_id) & (TreeCollectionState.collection_id == collection_id), 
+            isouter=True
+        )
+        .order_by(ConversationRoot.priority.desc())
+    ).all()
+    
+    samples = []
+    for root_id, state in unfinished_roots:
+        if state and state.is_completed: continue
+        idx = state.next_expansion_index if state else 0
+        if idx >= len(expansion_order): continue
+        node_code = expansion_order[idx]
+        
+        expected_role = col_config.get("asker_role") if len(node_code) % 2 == 1 else col_config.get("answerer_role")
+        if expected_role != ai_name: continue
+        
+        expected_ai_role = "asker" if len(node_code) % 2 == 1 else "answerer"
+        if expected_ai_role != ai_role: continue
+        
+        if is_locked(session, root_id, collection_id): continue
+        
+        sample_return = _build_sample_return(session, root_id, collection_id, node_code)
+        
+        data = sample_return.sample
+        if data.task_role == "question_answerer":
+            intended = getattr(data, "intended_question", None)
+        else:
+            intended = None
+            
+        ai_sample = AISampleData(
+            sample_id=generate_uuid(),
+            root_id=root_id,
+            node_code=node_code,
+            task_role=data.task_role,
+            multimodal_input=data.multimodal_input,
+            ambiguous_question=data.ambiguous_question,
+            intended_question=intended,
+            dialog_history=data.dialog_history
+        )
+        samples.append(ai_sample)
+        
+    return AITaskSamplesResponse(status="success", data=samples)
+
+
+@app.post(
+    "/api/v1/ai/task/response",
+    response_model=TaskResponseSuccess,
+    responses={
+        400: {"model": ErrorResponse, "description": "Invalid response."},
+        401: {"model": ErrorResponse, "description": "Invalid API key."}
+    }
+)
+async def ai_submit_task_response(
+    request: AITaskResponseRequest,
+    session: Session = Depends(db_manager.get_session),
+    x_api_key: str = Header(None)
+):
+    if API_KEY != x_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorResponse(status="error", message="Invalid API key.").model_dump()
+        )
+        
+    collection_id = request.collection_id
+    col_config = COLLECTIONS.get(collection_id)
+    if not col_config:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorResponse(status="error", message="Invalid collection_id.").model_dump()
+        )
+        
+    state = session.get(TreeCollectionState, (request.root_id, collection_id))
+    if not state:
+        state = TreeCollectionState(
+            root_id=request.root_id,
+            collection_id=collection_id,
+            next_expansion_index=0,
+            is_completed=False
+        )
+    if state.is_completed:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorResponse(status="error", message="Tree is already completed or state not found.").model_dump()
+        )
+        
+    expansion_order = col_config.get("expansion_order", [])
+    idx = state.next_expansion_index
+    if idx >= len(expansion_order) or expansion_order[idx] != request.node_code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorResponse(status="error", message="Node code mismatch.").model_dump()
+        )
+        
+    depth = len(request.node_code)
+    parent_node_code = request.node_code[:-1] if depth > 1 else None
+    parent_sample_id = None
+    if parent_node_code:
+        parent_sample = session.exec(
+            select(SampleResponse).where(
+                SampleResponse.root_id == request.root_id,
+                SampleResponse.collection_id == collection_id,
+                SampleResponse.node_code == parent_node_code
+            )
+        ).first()
+        if parent_sample:
+            parent_sample_id = parent_sample.sample_id
+            
+    response_data = request.response_data
+    sample_id = generate_uuid()
+    
+    from hazy_oracles_user_study.database import SAMPLE_TYPE
+    from datetime import datetime, timezone
+    
+    if response_data.response_type == "question_asker":
+        new_sample = SampleResponse(
+            sample_id=sample_id,
+            node_code=request.node_code,
+            user_unique_id=request.ai_name,
+            parent_sample_id=parent_sample_id,
+            root_id=request.root_id,
+            collection_id=collection_id,
+            depth=depth,
+            timestamp=datetime.now(timezone.utc),
+            participant_type=request.ai_name,
+            sample_type=SAMPLE_TYPE.ASKER,
+            previous_answer_meaningful_score=response_data.previous_answer_meaningful_score,
+            current_guess=response_data.current_guess,
+            current_guess_confidence_score=response_data.confidence_score,
+            next_question=response_data.next_question
+        )
+    else:
+        new_sample = SampleResponse(
+            sample_id=sample_id,
+            node_code=request.node_code,
+            user_unique_id=request.ai_name,
+            parent_sample_id=parent_sample_id,
+            root_id=request.root_id,
+            collection_id=collection_id,
+            depth=depth,
+            timestamp=datetime.now(timezone.utc),
+            participant_type=request.ai_name,
+            sample_type=SAMPLE_TYPE.ANSWERER,
+            previous_question_relevant_score=response_data.previous_question_relevant_score,
+            answer=response_data.answer
+        )
+        
+    session.add(new_sample)
+    state.next_expansion_index += 1
+    if state.next_expansion_index >= len(expansion_order):
+        state.is_completed = True
+    session.add(state)
+    session.commit()
+    
+    return TaskResponseSuccess(status="success", message="AI response recorded.")
 
 # --- SPA Production Serving ---
 

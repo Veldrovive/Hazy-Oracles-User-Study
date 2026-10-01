@@ -162,7 +162,7 @@ if __name__ == "__main__":
     PARAMS = {
         'a_total': 2,
         'a_expand': 2,
-        'b_total': 4,
+        'b_total': 1,
         'b_expand': 1,
         'max_expansions': 1e6,
         'max_depth': 6,
@@ -193,6 +193,6 @@ if __name__ == "__main__":
         "expansion_order_base64": base64_expansion_order
     }
 
-    with open("data/expansion_order.pkl", "wb") as f:
+    with open("data/expansion_order_ai.pkl", "wb") as f:
         pickle.dump(order_obj, f)
     

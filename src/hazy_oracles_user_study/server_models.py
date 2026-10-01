@@ -116,3 +116,25 @@ class TaskResponseRequest(BaseModel):
 class TaskResponseSuccess(BaseModel):
     status: Literal["success"] = "success"
     message: str
+
+# 5. AI Endpoints
+class AISampleData(BaseModel):
+    sample_id: str
+    root_id: str
+    node_code: str
+    task_role: Literal["question_asker", "question_answerer"]
+    multimodal_input: Union[MultimodalInputImage, MultimodalInputText]
+    ambiguous_question: str
+    intended_question: Optional[str] = None
+    dialog_history: List[DialogMessage]
+
+class AITaskSamplesResponse(BaseModel):
+    status: Literal["success"] = "success"
+    data: List[AISampleData]
+
+class AITaskResponseRequest(BaseModel):
+    collection_id: str
+    root_id: str
+    ai_name: str
+    node_code: str
+    response_data: Union[QuestionAskerResponseData, QuestionAnswererResponseData]

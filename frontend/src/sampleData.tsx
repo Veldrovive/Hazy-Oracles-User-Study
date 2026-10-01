@@ -2,18 +2,16 @@ import { type RatingQuestion } from './components/RatingForm';
 
 // --- Sample Data ---
 export const QUESTION_ANSWERER_INSTRUCTIONS = [
-    "Review the Test Image and the conversation.",
-    "Understand the target unambiguous question.",
-    "Rate the final Clarifying Question from the Agent.",
-    "Use the information to formulate your next unambiguous response."
+    "Review the image and the conversation.",
+    "Review the intended question.",
+    "Rate the previous clarifying question.",
+    "Respond to the clarifying question."
 ];
 export const QUESTION_ASKER_INSTRUCTIONS = [
-    "Formulate the target question in an unambiguous way.",
-    "Provide the image with region labels (if needed).",
-    "Receive clarifying questions from the assistant.",
-    "Answer the questions to the best of your ability.",
-    "Ask follow-up questions if the previous answers are not sufficient to make the question unambiguous.",
-    "Rate the assistant's response in terms of relevance.",
+    "Review the image and the conversation.",
+    "Rate the quality of the previous response.",
+    "Attempt to answer the original question.",
+    "Formulate a new clarifying question that you think will reduce the ambiguity of the situation."
 ];
 
 export const QUESTION_ANSWERER_DETAILED_INSTRUCTIONS_TITLE = "Detailed Instructions"

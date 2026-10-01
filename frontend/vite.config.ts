@@ -29,6 +29,9 @@ export default defineConfig(({ mode }) => {
     },
     ssr: {
       noExternal: ['nextstepjs', 'motion']
+    },
+    build: {
+      chunkSizeWarningLimit: 1500
     }
   }
 })

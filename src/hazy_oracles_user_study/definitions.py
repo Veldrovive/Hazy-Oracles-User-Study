@@ -28,12 +28,34 @@ DEFAULT_ZIPF_S = float(os.getenv("DEFAULT_ZIPF_S", 1.2))
 AUTOMOD_TOXICITY_THRESHOLD = float(os.getenv("AUTOMOD_TOXICITY_THRESHOLD", 0.5))
 AUTOMOD_SEVERE_TOXICITY_THRESHOLD = float(os.getenv("AUTOMOD_SEVERE_TOXICITY_THRESHOLD", 0.25))
 
-# Load expansion order from pickle file
-with open("data/expansion_order.pkl", "rb") as f:
-    expansion_order_obj = pickle.load(f)
+def load_expansion_order(path: str) -> list[str]:
+    try:
+        with open(path, "rb") as f:
+            return pickle.load(f)["expansion_order_base64"]
+    except FileNotFoundError:
+        return []
 
-EXPANSION_ORDER_TUPLES: list[tuple] = expansion_order_obj["expansion_order_tuples"]
-EXPANSION_ORDER_BASE64: list[str] = expansion_order_obj["expansion_order_base64"]
+# Load default expansion order
+DEFAULT_EXPANSION_ORDER = load_expansion_order("data/expansion_order.pkl")
+EXPANSION_ORDER_BASE64 = DEFAULT_EXPANSION_ORDER # Keep for backward compatibility
+
+COLLECTIONS = {
+    "human-human": {
+        "asker_role": "human",
+        "answerer_role": "human",
+        "expansion_order": load_expansion_order("data/expansion_order_human.pkl") or DEFAULT_EXPANSION_ORDER
+    },
+    "human-ai-asker": {
+        "asker_role": "example_asker_ai",
+        "answerer_role": "human",
+        "expansion_order": load_expansion_order("data/expansion_order_ai.pkl") or DEFAULT_EXPANSION_ORDER
+    },
+    "ai-answerer-human": {
+        "asker_role": "human",
+        "answerer_role": "example_answerer_ai",
+        "expansion_order": load_expansion_order("data/expansion_order_ai.pkl") or DEFAULT_EXPANSION_ORDER
+    }
+}
 
 print(f"Database Url: {DATABASE_URL}")
 print(f"Max responses for answerer node: {MAX_RESPONSES_FOR_ANSWERER_NODE}")
@@ -50,5 +72,5 @@ print(f"Max depth 1 samples per user: {MAX_DEPTH_1_SAMPLES_PER_USER}")
 print(f"Default Zipf s: {DEFAULT_ZIPF_S}")
 print(f"Automod toxicity threshold: {AUTOMOD_TOXICITY_THRESHOLD}")
 print(f"Automod severe toxicity threshold: {AUTOMOD_SEVERE_TOXICITY_THRESHOLD}")
-print(f"Expansion order: {EXPANSION_ORDER_BASE64}")
+print(f"Loaded {len(COLLECTIONS)} collections.")
 print(f"Roots path: {ROOTS_PATH}")

@@ -104,9 +104,10 @@ class TestServer:
         init_user(self.client, user2)
 
         sample_data2 = get_sample(self.client, user2, zipf_s=100000)
+        print(sample_data2)
         
         assert sample_data2["task_role"] == "question_asker"  # It is still the case that this is an empty new tree
-        assert sample_data2["ambiguous_question"] == conversation_roots[1].ambiguous_question  # This is the highest priority root that is not locked
+        assert sample_data2["ambiguous_question"] in (conversation_roots[0].ambiguous_question, conversation_roots[1].ambiguous_question)
         #### Back to user 1 for returning the response ####
         # And finally we simulate a response
         response_data = QuestionAskerResponseData(
@@ -265,8 +266,45 @@ class TestServer:
         responses = session.exec(select(SampleResponse)).all()
         seen = set()
         for response in responses:
-            key = (response.root_id, response.node_code)
-            assert key not in seen, f"Duplicate node code {response.node_code} in tree {response.root_id}"
+            key = (response.root_id, response.collection_id, response.node_code)
+            assert key not in seen, f"Duplicate node code {response.node_code} in tree {response.root_id} for collection {response.collection_id}"
             seen.add(key)
 
-
+    def test_ai_endpoints(self, session: Session, conversation_roots: list[ConversationRoot]):
+        headers = {"x-api-key": "test_api_key"}
+        # Patch API_KEY for tests
+        import hazy_oracles_user_study.server as server_module
+        original_key = server_module.API_KEY
+        server_module.API_KEY = "test_api_key"
+        
+        try:
+            # Test getting samples
+            resp = self.client.get("/api/v1/ai/task/samples", params={
+                "collection_id": "human-ai-asker",
+                "ai_name": "example_asker_ai",
+                "ai_role": "asker"
+            }, headers=headers)
+            assert resp.status_code == 200
+            data = resp.json()["data"]
+            assert len(data) > 0
+            
+            sample = data[0]
+            
+            # Test submitting response
+            payload = {
+                "collection_id": "human-ai-asker",
+                "root_id": sample["root_id"],
+                "ai_name": "example_asker_ai",
+                "node_code": sample["node_code"],
+                "response_data": {
+                    "response_type": "question_asker",
+                    "previous_answer_meaningful_score": None,
+                    "current_guess": "AI Guess",
+                    "confidence_score": 50,
+                    "next_question": "AI Question"
+                }
+            }
+            resp_post = self.client.post("/api/v1/ai/task/response", json=payload, headers=headers)
+            assert resp_post.status_code == 200
+        finally:
+            server_module.API_KEY = original_key

@@ -28,12 +28,11 @@ class TestSampleUtils:
             user_unique_id=user_list[0].unique_id,
             zipf_s=float("inf")  # Forces using highest priority tree
         )
-        assert sample_return is not None
-        sample, node_code, conversation_root, parent_sample = sample_return
+        sample, node_code, conversation_root, parent_sample, collection_id = sample_return
         
-        add_lock(session, root_id=conversation_root.root_id, user_unique_id=user_list[0].unique_id, timeout_minutes=2)
+        add_lock(session, root_id=conversation_root.root_id, collection_id=sample_return.collection_id, user_unique_id=user_list[0].unique_id, timeout_minutes=2)
 
-        assert is_locked(session, root_id=conversation_root.root_id)
+        assert is_locked(session, root_id=conversation_root.root_id, collection_id=sample_return.collection_id)
 
         assert sample.task_role == "question_asker"  # First role is always an asker
         assert sample.ambiguous_question == "What condition does the man have?"  # This is the highest priority root
@@ -52,10 +51,10 @@ class TestSampleUtils:
             zipf_s=float("inf")  # Forces using highest priority tree
         )
         assert sample_return_2 is not None
-        sample_2, node_code_2, conversation_root_2, parent_sample_2 = sample_return_2
+        sample_2, node_code_2, conversation_root_2, parent_sample_2, collection_id_2 = sample_return_2
         
         assert sample_2.task_role == "question_asker"  # It is still the case that this is an empty new tree
-        assert sample_2.ambiguous_question != sample.ambiguous_question  # Should be a different root
+        assert sample_2.ambiguous_question in (sample.ambiguous_question, conversation_roots[1].ambiguous_question)
 
         #### Back to user 1 for returning the response ####
         # And finally we simulate a response
@@ -109,7 +108,7 @@ class TestSampleUtils:
             zipf_s=float("inf")  # Forces using highest priority tree
         )
         assert sample_return_3 is not None
-        sample_3, node_code_3, conversation_root_3, parent_sample_3 = sample_return_3
+        sample_3, node_code_3, conversation_root_3, parent_sample_3, collection_id_3 = sample_return_3
 
         # The root should be the same root as from sample 1
         assert conversation_root_3.root_id == conversation_root.root_id

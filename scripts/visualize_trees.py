@@ -9,16 +9,17 @@ from hazy_oracles_user_study.database import (
     DatabaseManager,
     ConversationRoot,
     SampleResponse,
-    SAMPLE_TYPE
+    SAMPLE_TYPE,
+    TreeCollectionState
 )
 
-def visualize_tree(session, root: ConversationRoot, output_dir: Path):
+def visualize_tree(session, root: ConversationRoot, collection_id: str, output_dir: Path, prepend_progress: bool = False):
     """
     Generates a visual flow diagram of the conversation tree using Graphviz.
     """
     
     # Create the directed graph
-    dot = Digraph(name=f'DialogTree_{root.root_id}', comment='Dialog Tree Visualization')
+    dot = Digraph(name=f'DialogTree_{root.root_id}_{collection_id}', comment='Dialog Tree Visualization')
     dot.attr(rankdir='LR')  # Left to Right layout
     dot.attr('node', shape='plaintext') # Use plaintext so our HTML tables define the shape
     
@@ -62,7 +63,10 @@ def visualize_tree(session, root: ConversationRoot, output_dir: Path):
     dot.node(root.root_id, label=label)
 
     # 2. Query and Add Sample Nodes
-    statement = select(SampleResponse).where(SampleResponse.root_id == root.root_id)
+    statement = select(SampleResponse).where(
+        SampleResponse.root_id == root.root_id,
+        SampleResponse.collection_id == collection_id
+    )
     samples: list[SampleResponse] = session.exec(statement).all()
 
     # First pass adds all nodes
@@ -138,11 +142,17 @@ def visualize_tree(session, root: ConversationRoot, output_dir: Path):
 
     # Render
     try:
-        output_path = dot.render(root.root_id, directory=output_dir, format='png', view=False)
+        filename = f"{root.root_id}_{collection_id}"
+        if prepend_progress:
+            state = session.get(TreeCollectionState, (root.root_id, collection_id))
+            if state:
+                filename = f"{state.next_expansion_index:04d}_{filename}"
+                
+        output_path = dot.render(filename, directory=output_dir, format='png', view=False)
         print(f"Visualization saved to: {output_path}")
         return output_path
     except Exception as e:
-        print(f"Error rendering Graphviz for root {root.root_id}: {e}")
+        print(f"Error rendering Graphviz for root {root.root_id} and collection {collection_id}: {e}")
         return None
 
 def main():
@@ -153,6 +163,8 @@ def main():
     group.add_argument("--all", action="store_true", help="Visualize all trees in the database.")
     group.add_argument("--root-id", type=str, help="Visualize a specific tree by root ID.")
     
+    parser.add_argument("--collection-id", type=str, default=None, help="Visualize a specific collection.")
+    parser.add_argument("--prepend-progress", action="store_true", help="Prepend the next expansion index to the output filename.")
     parser.add_argument("--out-dir", type=str, default="./tree_visualizations", help="Output directory for visualizations.")
     
     args = parser.parse_args()
@@ -173,19 +185,36 @@ def main():
     
     try:
         if args.all:
+            if args.collection_id:
+                collections = [args.collection_id]
+            else:
+                collections = session.exec(select(TreeCollectionState.collection_id).distinct()).all()
+                if not collections:
+                    collections = ["human-human"]
+
             roots = session.exec(select(ConversationRoot)).all()
             if not roots:
                 print("No roots found in the database.")
             for root in roots:
-                print(f"Visualizing tree for root: {root.root_id}")
-                visualize_tree(session, root, out_dir)
+                for collection_id in collections:
+                    print(f"Visualizing tree for root: {root.root_id}, collection: {collection_id}")
+                    visualize_tree(session, root, collection_id, out_dir, args.prepend_progress)
         else:
             root = session.get(ConversationRoot, args.root_id)
             if not root:
                 print(f"Error: Root with ID '{args.root_id}' not found.")
                 return
-            print(f"Visualizing tree for root: {root.root_id}")
-            visualize_tree(session, root, out_dir)
+            
+            if args.collection_id:
+                collections = [args.collection_id]
+            else:
+                collections = session.exec(select(TreeCollectionState.collection_id).where(TreeCollectionState.root_id == args.root_id).distinct()).all()
+                if not collections:
+                    collections = ["human-human"]
+
+            for collection_id in collections:
+                print(f"Visualizing tree for root: {root.root_id}, collection: {collection_id}")
+                visualize_tree(session, root, collection_id, out_dir, args.prepend_progress)
     finally:
         session.close()
 

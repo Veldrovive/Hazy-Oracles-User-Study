@@ -45,6 +45,7 @@ class SentSample(SQLModel, table=True):
     user_unique_id: str = Field(index=True)  # Links to the unique id field in the User table
     parent_id: Optional[str] = Field(default=None, index=True)
     root_id: str = Field(default=None, index=True)
+    collection_id: str = Field(default="human-human", index=True)
     timestamp: datetime
     is_returned: bool = Field(default=False, index=True)
 
@@ -54,6 +55,7 @@ class SampleResponse(SQLModel, table=True):
     user_unique_id: str = Field(index=True)
     parent_sample_id: Optional[str] = Field(default=None, index=True)
     root_id: str = Field(index=True)
+    collection_id: str = Field(default="human-human", index=True)
 
     depth: int = Field(index=True)
     timestamp: datetime
@@ -81,6 +83,9 @@ class ConversationRoot(SQLModel, table=True):
     original_dataset: str
     original_dataset_sample_id: str
 
+class TreeCollectionState(SQLModel, table=True):
+    root_id: str = Field(primary_key=True, index=True)
+    collection_id: str = Field(primary_key=True, index=True)
     next_expansion_index: int = Field(index=True, default=0)
     is_completed: bool = Field(index=True, default=False)
 
@@ -106,7 +111,8 @@ class ModerationEvent(SQLModel, table=True):
 	human_notes: Optional[str] = Field(default=None)
 
 class TreeLock(SQLModel, table=True):
-    root_id: str = Field(primary_key=True)  # One lock per tree
+    root_id: str = Field(primary_key=True)
+    collection_id: str = Field(primary_key=True)
     user_unique_id: str = Field(index=True)
     expires_at: datetime
 
