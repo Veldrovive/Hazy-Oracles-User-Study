@@ -2,6 +2,7 @@
 .env
 /data
 *.db
+.DS_store
 
 # Python-generated files
 __pycache__/

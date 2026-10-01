@@ -45,14 +45,14 @@ COLLECTIONS = {
         "answerer_role": "human",
         "expansion_order": load_expansion_order("data/expansion_order_human.pkl") or DEFAULT_EXPANSION_ORDER
     },
-    "human-ai-asker": {
-        "asker_role": "example_asker_ai",
+    "human-base-ai-asker": {
+        "asker_role": "qwen3_vl_32b_base",  # Qwen32B without fine-tuning on question asking. Just a prompt.
         "answerer_role": "human",
         "expansion_order": load_expansion_order("data/expansion_order_ai.pkl") or DEFAULT_EXPANSION_ORDER
     },
-    "ai-answerer-human": {
-        "asker_role": "human",
-        "answerer_role": "example_answerer_ai",
+    "human-fine-tuned-ai-asker": {
+        "asker_role": "qwen3_vl_32b_rl_sft",  # Qwen32B fine tuned using RL to be better at asking questions.
+        "answerer_role": "human",
         "expansion_order": load_expansion_order("data/expansion_order_ai.pkl") or DEFAULT_EXPANSION_ORDER
     }
 }

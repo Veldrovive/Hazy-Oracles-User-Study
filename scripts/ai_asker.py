@@ -1,6 +1,11 @@
 import os
 import time
 import requests
+from dotenv import load_dotenv
+from pathlib import Path
+
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(env_path)
 
 API_URL = "http://localhost:8000/api/v1"
 API_KEY = os.getenv("API_KEY", "your-api-key")
