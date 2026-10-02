@@ -14,20 +14,16 @@ export const QUESTION_ASKER_INSTRUCTIONS = [
     "Formulate a new clarifying question that you think will reduce the ambiguity of the situation."
 ];
 
-export const QUESTION_ANSWERER_DETAILED_INSTRUCTIONS_TITLE = "Detailed Instructions"
-export const QUESTION_ASKER_DETAILED_INSTRUCTIONS_TITLE = "Detailed Instructions"
+export const QUESTION_ANSWERER_DETAILED_INSTRUCTIONS_TITLE = "Question Asker Role Instructions"
+export const QUESTION_ASKER_DETAILED_INSTRUCTIONS_TITLE = "Question Answerer Role Instructions"
 
 export const QUESTION_ANSWERER_DETAILED_INSTRUCTIONS_CONTENT = <>
-    <p>Detailed instructions</p>
-    <ul>
-        <li>Instruction 1</li>
-    </ul>
+    <p>In this study, you will repeatedly be presented with a partial conversation and be tasked with adding the next message in the dialog. "Answerer" is one of two roles you will play in this study. The "answerer" role is meant to answer a clarifying question.</p>
+    <i>If the previous response is not a clarifying question, you should not answer. Instead, say something like "that is not a question."</i>
 </>
 export const QUESTION_ASKER_DETAILED_INSTRUCTIONS_CONTENT = <>
-    <p>Detailed instructions</p>
-    <ul>
-        <li>Instruction 1</li>
-    </ul>
+    <p>In this study, you will repeatedly be presented with a partial conversation and be tasked with adding the next message in the dialog. "Asker" is one of two roles you will play in this study. The "asker" role is meant to ask a clarifying question.</p>
+    <i>Even if it seems to you like there is nothing to ask about, please attempt to formulate a meaningful clarifying question</i>
 </>
 
 

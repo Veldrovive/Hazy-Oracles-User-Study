@@ -323,6 +323,14 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
     };
 
     // Removed unconditional arrow timer
+    
+    const handleRerunTour = () => {
+        if (task_role === 'question_asker') {
+            startNextStep('asker-tour');
+        } else if (task_role === 'question_answerer') {
+            startNextStep('answerer-tour');
+        }
+    };
 
     const { instructions, detailed_instructions_title, detailed_instructions_content, rating_questions } = useMemo(() => {
         switch (task_role) {
@@ -535,7 +543,7 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
                     maxWidth: '500px',
                     justifyContent: "space-between"
                 }}>
-                    <TaskInstructions instructions={instructions} modalTitle={detailed_instructions_title} modalContent={detailed_instructions_content} />
+                    <TaskInstructions instructions={instructions} modalTitle={detailed_instructions_title} modalContent={detailed_instructions_content} onRerunTour={handleRerunTour} />
                     <Box sx={{
                         display: "flex",
                         flexDirection: "column"

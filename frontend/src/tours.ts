@@ -57,6 +57,13 @@ export const steps: Tour[] = [
         selector: "#detailed-instructions-button",
         side: 'bottom',
         showControls: true
+      },
+      {
+        title: "Rerun Tour",
+        content: "If you ever need to see this tour again, you can click this button to rerun it.",
+        selector: "#rerun-tour-button",
+        side: 'right',
+        showControls: true
       }
     ]
   },
@@ -91,7 +98,7 @@ export const steps: Tour[] = [
       },
       {
         title: "Answer the Question",
-        content: "Now you use the hidden knowledge from the intended question to answer the question from the previous message.",
+        content: "Now you use the hidden knowledge from the intended question to answer the question from the previous message. You should try to give as little information as possible away while still answering the question truthfully.",
         selector: "#chat-input",
         side: 'top',
         showControls: true
@@ -122,6 +129,13 @@ export const steps: Tour[] = [
         content: "For detailed instructions you can press this 'i' icon.",
         selector: "#detailed-instructions-button",
         side: 'bottom',
+        showControls: true
+      },
+      {
+        title: "Rerun Tour",
+        content: "If you ever need to see this tour again, you can click this button to rerun it.",
+        selector: "#rerun-tour-button",
+        side: 'right',
         showControls: true
       }
     ]

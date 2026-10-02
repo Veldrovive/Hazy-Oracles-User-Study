@@ -1,4 +1,4 @@
-import { Box, Typography, IconButton, Modal } from '@mui/material';
+import { Box, Typography, IconButton, Modal, Button } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import { useBoolean } from 'usehooks-ts';
 
@@ -6,6 +6,7 @@ interface TaskInstructionsProps {
     instructions: string[];
     modalTitle?: string;
     modalContent?: React.ReactNode;
+    onRerunTour?: () => void;
 }
 
 const style = {
@@ -20,7 +21,7 @@ const style = {
     p: 4,
 };
 
-export function TaskInstructions({ instructions, modalTitle, modalContent }: TaskInstructionsProps) {
+export function TaskInstructions({ instructions, modalTitle, modalContent, onRerunTour }: TaskInstructionsProps) {
     const { value: instructionModalOpen, setTrue: handleOpenModal, setFalse: handleCloseModal } = useBoolean(false);
     return (
         <Box
@@ -63,6 +64,11 @@ export function TaskInstructions({ instructions, modalTitle, modalContent }: Tas
                     </li>
                 ))}
             </ol>
+            {onRerunTour && (
+                <Button id="rerun-tour-button" variant="outlined" size="small" onClick={onRerunTour} sx={{ mt: 2 }}>
+                    Rerun Tour
+                </Button>
+            )}
         </Box>
     );
 }
