@@ -554,7 +554,7 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
                                 : null
                         }
 
-                        {dialog_history.length > 0 && (
+                        {dialog_history.length > 0 ? (
                             <RatingForm
                                 title={task_role === 'question_asker' ? "Rate the previous answer" : "Rate the previous clarifying question"}
                                 questions={rating_questions}
@@ -564,6 +564,24 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
                                 setIsHovered={setIsRatingFormHovered}
                                 id={"rating-box"}
                             />
+                        ) : (
+                            <Box
+                                id="rating-box"
+                                sx={{
+                                    p: 2,
+                                    bgcolor: 'white',
+                                    borderRadius: 1,
+                                    border: '1px solid #e0e0e0',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                                }}
+                            >
+                                <Typography variant="h6" gutterBottom>
+                                    {task_role === 'question_asker' ? "Rate the previous answer" : "Rate the previous clarifying question"}
+                                </Typography>
+                                <Typography variant="body1" color="text.secondary">
+                                    There is no previous response to rate yet.
+                                </Typography>
+                            </Box>
                         )}
 
                         {

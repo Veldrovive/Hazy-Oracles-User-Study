@@ -18,7 +18,7 @@ export const steps: Tour[] = [
       },
       {
         title: "Rate Previous Answer",
-        content: "This box appears if there is a previous response. Think about how helpful you think this previous response is in reducing the ambiguity of the situation.",
+        content: "Think about how helpful you think this previous response is in reducing the ambiguity of the situation. If there is no previous response, you will not be asked to rate anything.",
         selector: "#rating-box",
         side: 'right',
         showControls: true
