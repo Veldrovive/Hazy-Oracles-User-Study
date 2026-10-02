@@ -68,6 +68,8 @@ class MultimodalInputText(BaseModel):
 class DialogMessage(BaseModel):
     role: Literal["question_asker", "question_answerer"]
     text: str
+    is_flagged: Optional[bool] = None
+    flagged_reason: Optional[str] = None
 
 class QuestionAskerSampleData(BaseModel):
     sample_id: str
@@ -101,11 +103,15 @@ class QuestionAskerResponseData(BaseModel):
     current_guess: str
     confidence_score: int
     next_question: str
+    is_flagged: Optional[bool] = None
+    flagged_reason: Optional[str] = None
 
 class QuestionAnswererResponseData(BaseModel):
     response_type: Literal["question_answerer"]
     previous_question_relevant_score: Optional[int] = None
     answer: str
+    is_flagged: Optional[bool] = None
+    flagged_reason: Optional[str] = None
 
 class TaskResponseRequest(BaseModel):
     login_id: str

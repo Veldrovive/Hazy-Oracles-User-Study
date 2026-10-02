@@ -74,6 +74,9 @@ class SampleResponse(SQLModel, table=True):
     previous_question_relevant_score: Optional[float] = None
     answer: Optional[str] = None
 
+    is_flagged: bool = Field(default=False, index=True)
+    flagged_reason: Optional[str] = None
+
 class ConversationRoot(SQLModel, table=True):
     root_id: str = Field(primary_key=True, index=True)
     ambiguous_question: str

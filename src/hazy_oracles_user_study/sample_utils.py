@@ -352,7 +352,9 @@ def _build_sample_return(db: Session, selected_root_id: str, collection_id: str,
             dialog_history.append(
                 DialogMessage(
                     text = ancestor_sample.next_question,
-                    role = "question_asker"
+                    role = "question_asker",
+                    is_flagged = ancestor_sample.is_flagged,
+                    flagged_reason = ancestor_sample.flagged_reason
                 )
             )
         elif sample_type == SAMPLE_TYPE.ANSWERER:
@@ -360,7 +362,9 @@ def _build_sample_return(db: Session, selected_root_id: str, collection_id: str,
             dialog_history.append(
                 DialogMessage(
                     text = ancestor_sample.answer,
-                    role = "question_answerer"
+                    role = "question_answerer",
+                    is_flagged = ancestor_sample.is_flagged,
+                    flagged_reason = ancestor_sample.flagged_reason
                 )
             )
 

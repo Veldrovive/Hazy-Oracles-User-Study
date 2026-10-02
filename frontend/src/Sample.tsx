@@ -38,7 +38,9 @@ export interface MultimodalInput {
 
 export interface DialogMessage {
     role: 'question_asker' | 'question_answerer',
-    text: string
+    text: string,
+    is_flagged?: boolean,
+    flagged_reason?: string
 }
 
 export interface SampleData {
@@ -353,7 +355,9 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
                 message: message.text,
                 sender: senderLabel,
                 direction: direction,
-                position: 'single'
+                position: 'single',
+                is_flagged: message.is_flagged,
+                flagged_reason: message.flagged_reason
             }
         })
 
@@ -362,7 +366,9 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
             message: ambiguous_question,
             sender: 'You',
             direction: task_role === 'question_asker' ? 'incoming' : 'outgoing',
-            position: 'single'
+            position: 'single',
+            is_flagged: false,
+            flagged_reason: undefined
         })
         return history
     }, [dialog_history, task_role])

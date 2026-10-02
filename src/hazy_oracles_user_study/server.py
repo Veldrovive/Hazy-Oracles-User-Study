@@ -586,7 +586,9 @@ async def ai_submit_task_response(
             previous_answer_meaningful_score=response_data.previous_answer_meaningful_score,
             current_guess=response_data.current_guess,
             current_guess_confidence_score=response_data.confidence_score,
-            next_question=response_data.next_question
+            next_question=response_data.next_question,
+            is_flagged=getattr(response_data, "is_flagged", False) or False,
+            flagged_reason=getattr(response_data, "flagged_reason", None)
         )
     else:
         new_sample = SampleResponse(
@@ -601,7 +603,9 @@ async def ai_submit_task_response(
             participant_type=request.ai_name,
             sample_type=SAMPLE_TYPE.ANSWERER,
             previous_question_relevant_score=response_data.previous_question_relevant_score,
-            answer=response_data.answer
+            answer=response_data.answer,
+            is_flagged=getattr(response_data, "is_flagged", False) or False,
+            flagged_reason=getattr(response_data, "flagged_reason", None)
         )
         
     session.add(new_sample)

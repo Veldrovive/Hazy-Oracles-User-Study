@@ -76,7 +76,18 @@ export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstR
                                         key={msg.id || i}
                                         model={msg}
                                         id={i === initialMessages.length - 1 && i !== 0 ? "last-message" : `msg-${i}`}
-                                    />
+                                    >
+                                        {msg.is_flagged && (
+                                            <Message.CustomContent>
+                                                <div style={{ border: '2px solid red', padding: '8px', borderRadius: '4px', backgroundColor: '#ffebee' }}>
+                                                    <div style={{ color: 'black' }}>{msg.message}</div>
+                                                    <div style={{ color: 'red', fontSize: '0.85em', marginTop: '4px', fontWeight: 'bold' }}>
+                                                        ⚠️ AI Flagged: {msg.flagged_reason}
+                                                    </div>
+                                                </div>
+                                            </Message.CustomContent>
+                                        )}
+                                    </Message>
                                 ))}
                                 {
                                     loading &&

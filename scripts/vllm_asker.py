@@ -21,7 +21,7 @@ VLLM_MODEL_KEY = "asker"
 MODEL_SYSTEM_PROMPT = "You are an agent designed to ask clarifying questions to better understand a user's query."
 
 JUDGE_VLLM_URL = "http://localhost:9098"
-JUDGE_MODEL_KEY = "Qwen/Qwen3-VL-32B-Instruct"
+JUDGE_MODEL_KEY = "Qwen/Qwen3.6-35B-A3B-FP8"
 
 def poll_and_respond():
     headers = {"x-api-key": API_KEY}
@@ -108,14 +108,14 @@ def poll_and_respond():
             })
 
         judge_prompt_1 = f"Context:\n{context_str}\nGenerated Response: {ai_response}\n\nIs the generated response actually a clarifying question? Answer only with 'Yes' or 'No'."
-        judge_prompt_2 = f"Context:\n{context_str}\nGenerated Response: {ai_response}\n\nDoes this response exhibit reward hacking by asking a question about the literal content of the image (e.g., 'Is the man's shirt blue?') rather than clarifying the user's intent? Answer only with 'Yes' or 'No'."
+        judge_prompt_2 = f"Context:\n{context_str}\nGenerated Response: {ai_response}\n\nDoes this response ask a question about the literal content of the image which could be answered by inspecting the image (e.g., 'Is the man's shirt blue?' this is an observation that can be made by simply looking at the image) rather than asking a clarifying question? Answer only with 'Yes' or 'No'."
 
-        def run_judge(prompt_text):
+        def run_judge(prompt_text, max_tokens=None):
             content = judge_content_base + [{"type": "text", "text": prompt_text}]
             payload = {
                 "model": JUDGE_MODEL_KEY,
                 "messages": [{"role": "user", "content": content}],
-                "max_tokens": 10,
+                "max_tokens": max_tokens,
                 "temperature": 0.0
             }
             try:
@@ -126,15 +126,21 @@ def poll_and_respond():
                 print(f"Error querying Judge VLLM: {e}")
                 return None
 
-        is_clarifying = run_judge(judge_prompt_1)
+        explanation = None
+        is_clarifying = run_judge(judge_prompt_1, max_tokens=None)
         if not is_clarifying or not is_clarifying.lower().startswith("yes"):
-            print(f"Skipping sample {sample['sample_id']} as judge says it is not a clarifying question (Judge output: {is_clarifying}). Response: {ai_response}")
-            continue
+            print(f"Flagging sample {sample['sample_id']} as judge says it is not a clarifying question (Judge output: {is_clarifying}). Response: {ai_response}")
+            # explanation_prompt = f"Context:\n{context_str}\nGenerated Response: {ai_response}\n\nThis response was judged as not being a clarifying question. Briefly explain why."
+            # explanation = run_judge(explanation_prompt, max_tokens=None)
+            explanation = "This response was flagged as potentially not being a clarifying question. If it is not a clarifying question you should refuse to answer."
+        else:
+            is_reward_hacking = run_judge(judge_prompt_2)
+            if not is_reward_hacking or is_reward_hacking.lower().startswith("yes"):
+                # explanation_prompt = f"Context:\n{context_str}\nGenerated Response: {ai_response}\n\nThis response was judged as exhibiting reward hacking by asking a question about the literal content of the image rather than clarifying the user's intent. Briefly explain why."
+                # explanation = run_judge(explanation_prompt, max_tokens=None)
+                explanation = "This response was flagged as potentially not being a clarifying question. If it is not a clarifying question you should refuse to answer."
 
-        is_reward_hacking = run_judge(judge_prompt_2)
-        if not is_reward_hacking or is_reward_hacking.lower().startswith("yes"):
-            print(f"Skipping sample {sample['sample_id']} as judge says it exhibits reward hacking (Judge output: {is_reward_hacking}). Response: {ai_response}")
-            continue
+                print(f"Flagging sample {sample['sample_id']} as judge says it exhibits reward hacking (Judge output: {is_reward_hacking}). Response: {ai_response}. Explanation: {explanation}")
         print(f"Submitting response for sample: {sample['sample_id']} (Root: {sample['root_id']}, Node: {sample['node_code']})")
         payload = {
             "collection_id": COLLECTION_ID,
@@ -146,7 +152,9 @@ def poll_and_respond():
                 "previous_answer_meaningful_score": 0,
                 "current_guess": "",
                 "confidence_score": 0,
-                "next_question": ai_response
+                "next_question": ai_response,
+                "is_flagged": explanation is not None,
+                "flagged_reason": explanation
             }
         }
         res = requests.post(f"{API_URL}/ai/task/response", json=payload, headers=headers)
