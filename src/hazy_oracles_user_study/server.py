@@ -318,7 +318,6 @@ async def get_task_sample(request: TaskSampleRequest, session: Session = Depends
             is_new_sample = True
             sample_return = select_sample_for_participant(
                 db=session,
-                node_code_expansion_order=EXPANSION_ORDER_BASE64,
                 user_unique_id=user.unique_id,
                 zipf_s=request.zipf_s
             )
@@ -380,8 +379,7 @@ async def submit_task_response(request: TaskResponseRequest, session: Session = 
     try:
         process_returned_sample(
             db=session,
-            response=request,
-            selected_expansion_order=EXPANSION_ORDER_BASE64
+            response=request
         )
         return TaskResponseSuccess(
             status="success",

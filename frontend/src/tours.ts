@@ -97,6 +97,13 @@ export const steps: Tour[] = [
         showControls: true
       },
       {
+        title: "IMPORTANT: Edge cases",
+        content: "If the previous question is not really a clarifying question, for example just asking you to give the answer yourself, refuse to answer it. If it feels to you like cheating, you should not answer it.",
+        selector: "#chat-input",
+        side: 'top',
+        showControls: true
+      },
+      {
         title: "Submit Everything",
         content: "When you press the submit button, it will submit everything at once.",
         selector: "#submit-button",

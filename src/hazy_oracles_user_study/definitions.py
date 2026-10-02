@@ -33,27 +33,24 @@ def load_expansion_order(path: str) -> list[str]:
         with open(path, "rb") as f:
             return pickle.load(f)["expansion_order_base64"]
     except FileNotFoundError:
-        return []
+        raise FileNotFoundError(f"Expansion order not found at {path}")
 
-# Load default expansion order
-DEFAULT_EXPANSION_ORDER = load_expansion_order("data/expansion_order.pkl")
-EXPANSION_ORDER_BASE64 = DEFAULT_EXPANSION_ORDER # Keep for backward compatibility
 
 COLLECTIONS = {
     "human-human": {
         "asker_role": "human",
         "answerer_role": "human",
-        "expansion_order": load_expansion_order("data/expansion_order_human.pkl") or DEFAULT_EXPANSION_ORDER
+        "expansion_order": load_expansion_order("data/expansion_order.pkl")
     },
     "human-base-ai-asker": {
         "asker_role": "qwen3_vl_32b_base",  # Qwen32B without fine-tuning on question asking. Just a prompt.
         "answerer_role": "human",
-        "expansion_order": load_expansion_order("data/expansion_order_ai.pkl") or DEFAULT_EXPANSION_ORDER
+        "expansion_order": load_expansion_order("data/expansion_order_ai.pkl")
     },
     "human-fine-tuned-ai-asker": {
         "asker_role": "qwen3_vl_32b_rl_sft",  # Qwen32B fine tuned using RL to be better at asking questions.
         "answerer_role": "human",
-        "expansion_order": load_expansion_order("data/expansion_order_ai.pkl") or DEFAULT_EXPANSION_ORDER
+        "expansion_order": load_expansion_order("data/expansion_order_ai.pkl")
     }
 }
 

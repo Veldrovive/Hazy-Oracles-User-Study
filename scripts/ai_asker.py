@@ -9,8 +9,8 @@ load_dotenv(env_path)
 
 API_URL = "http://localhost:8000/api/v1"
 API_KEY = os.getenv("API_KEY", "your-api-key")
-COLLECTION_ID = "human-ai-asker"
-AI_NAME = "example_asker_ai"
+COLLECTION_ID = "human-base-ai-asker"
+AI_NAME = "qwen3_vl_32b_base"
 
 def poll_and_respond():
     headers = {"x-api-key": API_KEY}

@@ -212,7 +212,7 @@ class SampleReturn(NamedTuple):
     collection_id: str
     
 
-def select_sample_for_participant(db: Session, node_code_expansion_order: list[str], user_unique_id: str, zipf_s: float = DEFAULT_ZIPF_S) -> SampleReturn:
+def select_sample_for_participant(db: Session, user_unique_id: str, zipf_s: float = DEFAULT_ZIPF_S) -> SampleReturn:
     criteria = check_participant_criteria(db, user_unique_id)
     if criteria.is_excluded:
         if not criteria.exists:
@@ -222,6 +222,7 @@ def select_sample_for_participant(db: Session, node_code_expansion_order: list[s
         elif criteria.num_responses >= MAX_TOTAL_RESPONSES:
             raise MaxResponsesReachedError("You have reached the maximum total number of responses for this study.")
         else:
+            print("No samples found. Criteria object: ", criteria)
             raise NoSamplesAvailableError("No samples available at this time.")
 
     participated_root_ids = db.exec(select(SampleResponse.root_id).where(SampleResponse.user_unique_id == user_unique_id)).all()
@@ -292,6 +293,7 @@ def select_sample_for_participant(db: Session, node_code_expansion_order: list[s
         # Check if they were excluded because of depth 1 cap
         if depth_1_capped:
             raise Depth1CapReachedError("You have reached the limit for starting new conversations right now. If you check back a bit later, more follow-up tasks should become available.")
+        print("No eligible collections found.")
         raise NoSamplesAvailableError("No samples available at this time.")
 
     # Find the minimum completion rate
@@ -476,7 +478,7 @@ class Depth1CapReachedError(Exception):
     pass
     
 
-def process_returned_sample(db: Session, response: TaskResponseRequest, selected_expansion_order: list[str]) -> bool:
+def process_returned_sample(db: Session, response: TaskResponseRequest) -> bool:
     incoming_sample_id = response.sample_id
     sent_sample = get_sent_sample(db, sample_id=incoming_sample_id)
     if sent_sample is None:
@@ -514,7 +516,9 @@ def process_returned_sample(db: Session, response: TaskResponseRequest, selected
         )
 
     col_config = COLLECTIONS.get(collection_id)
-    actual_expansion_order = col_config.get("expansion_order") if col_config else selected_expansion_order
+    if col_config is None or "expansion_order" not in col_config:
+        raise ValueError(f"Collection {collection_id} not found or missing expansion_order")
+    actual_expansion_order = col_config["expansion_order"]
 
     root_next_expansion_index = collection_state.next_expansion_index
     if collection_state.is_completed or root_next_expansion_index >= len(actual_expansion_order):
