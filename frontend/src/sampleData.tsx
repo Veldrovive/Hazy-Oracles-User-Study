@@ -77,18 +77,18 @@ export const DUMMY_ASKER_SAMPLE: SampleData = {
     task_role: 'question_asker',
     multimodal_input: {
         type: 'image',
-        url: 'https://beentheredonethatwithkids.com/wp-content/uploads/2016/07/Virginia-Safari-Park-Zebra-in-Car-scaled.jpg'
+        url: '/example_img.jpg'
     },
-    ambiguous_question: 'Where is the large white item?',
-    intended_question: 'What is the precise location of the zebra relative to the red car?',
+    ambiguous_question: 'Who is associated with this stuffed animal?',
+    intended_question: 'Which american president is most associated with the stuffed animal seen here?',
     dialog_history: [
         {
             role: 'question_asker',
-            text: 'Are you talking about the animal?'
+            text: 'There are many types of association. Do you mean who is this bear dressed as?'
         },
         {
             role: 'question_answerer',
-            text: 'Yes.'
+            text: 'Yes, I meant who is he dressed as.'
         }
     ]
 };
@@ -98,22 +98,22 @@ export const DUMMY_ANSWERER_SAMPLE: SampleData = {
     task_role: 'question_answerer',
     multimodal_input: {
         type: 'image',
-        url: 'https://beentheredonethatwithkids.com/wp-content/uploads/2016/07/Virginia-Safari-Park-Zebra-in-Car-scaled.jpg'
+        url: '/example_img.jpg'
     },
-    ambiguous_question: 'Where is the large white item?',
-    intended_question: 'What is the precise location of the zebra relative to the red car?',
+    ambiguous_question: 'Who is associated with this stuffed animal?',
+    intended_question: 'Which american president is most associated with the stuffed animal seen here?',
     dialog_history: [
         {
             role: 'question_asker',
-            text: 'Are you talking about the animal?'
+            text: 'There are many types of association. Do you mean who is this bear dressed as?'
         },
         {
             role: 'question_answerer',
-            text: 'Yes.'
+            text: 'Yes, I meant who is he dressed as.'
         },
         {
             role: 'question_asker',
-            text: 'The one sticking it\'s head in the window?'
+            text: 'Is the wine also relevant?'
         }
     ]
 };

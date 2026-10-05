@@ -323,7 +323,7 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
     };
 
     // Removed unconditional arrow timer
-    
+
     const handleRerunTour = () => {
         if (task_role === 'question_asker') {
             startNextStep('asker-tour');
@@ -332,10 +332,11 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
         }
     };
 
-    const { instructions, detailed_instructions_title, detailed_instructions_content, rating_questions } = useMemo(() => {
+    const { instructions_title, instructions, detailed_instructions_title, detailed_instructions_content, rating_questions } = useMemo(() => {
         switch (task_role) {
             case 'question_answerer':
                 return {
+                    instructions_title: "Instructions: Question Answerer",
                     instructions: QUESTION_ANSWERER_INSTRUCTIONS,
                     detailed_instructions_title: QUESTION_ANSWERER_DETAILED_INSTRUCTIONS_TITLE,
                     detailed_instructions_content: QUESTION_ANSWERER_DETAILED_INSTRUCTIONS_CONTENT,
@@ -343,6 +344,7 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
                 };
             case 'question_asker':
                 return {
+                    instructions_title: "Instructions: Question Asker",
                     instructions: QUESTION_ASKER_INSTRUCTIONS,
                     detailed_instructions_title: QUESTION_ASKER_DETAILED_INSTRUCTIONS_TITLE,
                     detailed_instructions_content: QUESTION_ASKER_DETAILED_INSTRUCTIONS_CONTENT,
@@ -478,7 +480,6 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
                 <Xarrow
                     end="intended-question"
                     endAnchor="auto"
-                    labels={{ end: "Intended to ask" }}
                     start={firstResponseRef}
                     startAnchor="auto"
                     zIndex={100}
@@ -543,7 +544,7 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
                     maxWidth: '500px',
                     justifyContent: "space-between"
                 }}>
-                    <TaskInstructions instructions={instructions} modalTitle={detailed_instructions_title} modalContent={detailed_instructions_content} onRerunTour={handleRerunTour} />
+                    <TaskInstructions title={instructions_title} instructions={instructions} modalTitle={detailed_instructions_title} modalContent={detailed_instructions_content} onRerunTour={handleRerunTour} />
                     <Box sx={{
                         display: "flex",
                         flexDirection: "column"

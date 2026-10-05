@@ -3,6 +3,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import { useBoolean } from 'usehooks-ts';
 
 interface TaskInstructionsProps {
+    title?: string;
     instructions: string[];
     modalTitle?: string;
     modalContent?: React.ReactNode;
@@ -21,7 +22,7 @@ const style = {
     p: 4,
 };
 
-export function TaskInstructions({ instructions, modalTitle, modalContent, onRerunTour }: TaskInstructionsProps) {
+export function TaskInstructions({ title, instructions, modalTitle, modalContent, onRerunTour }: TaskInstructionsProps) {
     const { value: instructionModalOpen, setTrue: handleOpenModal, setFalse: handleCloseModal } = useBoolean(false);
     return (
         <Box
@@ -35,7 +36,7 @@ export function TaskInstructions({ instructions, modalTitle, modalContent, onRer
             }}
         >
             <Typography variant="h6" gutterBottom>
-                Task Instructions
+                {title || "Task Instructions"}
                 <IconButton id="detailed-instructions-button" onClick={handleOpenModal} size="small" sx={{ ml: 1, color: 'action.active' }}>
                     <InfoIcon fontSize="small" />
                 </IconButton>
