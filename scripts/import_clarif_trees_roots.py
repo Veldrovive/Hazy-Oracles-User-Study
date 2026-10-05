@@ -46,7 +46,7 @@ def main():
             print(f"Error: Chosen samples path {p} does not exist.")
             exit(1)
 
-    local_roots_path = Path(__file__).parent.parent / "data" / "conversation_roots" / "clarif_trees"
+    local_roots_path = Path("./data/conversation_roots/clarif_trees")
     local_roots_path.mkdir(parents=True, exist_ok=True)
     local_roots_image_dir = local_roots_path / "images"
     local_roots_image_dir.mkdir(parents=True, exist_ok=True)

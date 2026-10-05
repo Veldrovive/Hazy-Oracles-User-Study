@@ -9,7 +9,6 @@ __pycache__/
 .venv/
 .python-version
 database.db
-data/
 
 # Frontend
 frontend/node_modules/

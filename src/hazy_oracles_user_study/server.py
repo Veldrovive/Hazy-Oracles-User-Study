@@ -64,7 +64,6 @@ async def lifespan(app: FastAPI):
     # Initialize the database and create tables if they don't exist
     db_manager.create_db_and_tables()
     
-    
     with Session(db_manager.engine) as session:
         print(f"Total root dirs: {len(list(ROOTS_PATH.iterdir()))}")
         progress = tqdm(ROOTS_PATH.iterdir(), desc="Loading conversation roots")

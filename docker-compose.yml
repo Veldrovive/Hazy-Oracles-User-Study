@@ -1,0 +1,23 @@
+version: "3.8"
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8088:8000"
+    environment:
+      - API_KEY=${API_KEY}
+      - ROOTS_PATH=./data/conversation_roots
+      - DATABASE_URL=sqlite:///./database.db
+      - LOCK_TIMEOUT_MINUTES=2
+      - PHASE_1_QUALIFICATION_NUM_RESPONSES=10
+      - MAX_AUTOMOD_FLAGS=2
+      - MAX_TOTAL_RESPONSES=100
+      - MAX_DEPTH_1_SAMPLES_PER_USER=5
+      - DEFAULT_ZIPF_S=1.2
+      - AUTOMOD_TOXICITY_THRESHOLD=0.5
+      - AUTOMOD_SEVERE_TOXICITY_THRESHOLD=0.25
+    volumes:
+      - ./database.db:/app/database.db
+      - ./data:/app/data
+    restart: unless-stopped

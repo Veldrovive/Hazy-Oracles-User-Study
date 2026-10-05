@@ -5,7 +5,7 @@ from pathlib import Path
 load_dotenv()
 
 API_KEY = os.getenv("API_KEY")
-ROOTS_PATH = Path(__file__).parent.parent.parent / os.getenv("ROOTS_PATH", "data/conversation_roots")
+ROOTS_PATH = Path(os.getenv("ROOTS_PATH", "./data/conversation_roots"))
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./database.db")
 
 MAX_RESPONSES_FOR_ANSWERER_NODE = int(os.getenv("MAX_RESPONSES_FOR_ANSWERER_NODE", 5))
