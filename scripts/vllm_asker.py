@@ -8,7 +8,8 @@ from pathlib import Path
 env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(env_path)
 
-API_URL = "http://localhost:8000/api/v1"
+BASE_URL = "http://localhost:8088"
+API_URL = f"{BASE_URL}/api/v1"
 API_KEY = os.getenv("API_KEY", "your-api-key")
 COLLECTION_ID = "human-fine-tuned-ai-asker"
 AI_NAME = "qwen3_vl_32b_rl_sft"
@@ -53,7 +54,7 @@ def poll_and_respond():
         first_user_content = []
         if sample['multimodal_input']['type'] == 'image':
             image_url_path = sample['multimodal_input']['url']
-            full_image_url = f"http://localhost:8000{image_url_path}"
+            full_image_url = f"{BASE_URL}{image_url_path}"
             
             img_response = requests.get(full_image_url)
             if img_response.status_code == 200:

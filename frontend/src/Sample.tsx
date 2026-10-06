@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Box, CircularProgress, Alert, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Tooltip, IconButton, ToggleButton, ToggleButtonGroup, Drawer, List, ListItem, ListItemButton, ListItemText, ListItemIcon } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
@@ -69,6 +69,9 @@ function SampleWrapper() {
 
     const [hasReadAsker, setHasReadAsker] = useState(true);
     const [hasReadAnswerer, setHasReadAnswerer] = useState(true);
+    const [responsesCompleted, setResponsesCompleted] = useState<number>(0);
+    const [maxResponsesAllowed, setMaxResponsesAllowed] = useState<number>(0);
+    const [currentPhase, setCurrentPhase] = useState<number>(1);
 
     const fetchSample = async () => {
         setIsLoading(true);
@@ -96,6 +99,43 @@ function SampleWrapper() {
         }
     };
 
+    const fetchUserSummary = useCallback(async (isMounted: boolean = true) => {
+        try {
+            const summaryRes = await fetch('/api/v1/user/summary', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login_id: loginId, password })
+            });
+
+            if (!summaryRes.ok) {
+                if (isMounted) {
+                    setLoginId('');
+                    setPassword('');
+                    setHasConsented(false);
+                    navigate('/?message=' + encodeURIComponent('Please enter your login id and password again'));
+                }
+                return false;
+            }
+
+            const summaryData = await summaryRes.json();
+            if (!summaryData.data.has_consented) {
+                if (isMounted) navigate('/consent');
+                return false;
+            }
+
+            if (!isMounted) return false;
+            setHasReadAsker(summaryData.data.has_read_asker_instructions);
+            setHasReadAnswerer(summaryData.data.has_read_answerer_instructions);
+            setResponsesCompleted(summaryData.data.responses_completed);
+            setMaxResponsesAllowed(summaryData.data.max_responses_allowed);
+            setCurrentPhase(summaryData.data.current_phase);
+            return true;
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+    }, [loginId, password, navigate, setLoginId, setPassword, setHasConsented]);
+
     useEffect(() => {
         let isMounted = true;
         const load = async () => {
@@ -104,40 +144,15 @@ function SampleWrapper() {
                 return;
             }
 
-            try {
-                const summaryRes = await fetch('/api/v1/user/summary', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ login_id: loginId, password })
-                });
-
-                if (!summaryRes.ok) {
-                    setLoginId('');
-                    setPassword('');
-                    setHasConsented(false);
-                    navigate('/?message=' + encodeURIComponent('Please enter your login id and password again'));
-                    return;
-                }
-
-                const summaryData = await summaryRes.json();
-                if (!summaryData.data.has_consented) {
-                    navigate('/consent');
-                    return;
-                }
-
-                if (!isMounted) return;
-                setHasReadAsker(summaryData.data.has_read_asker_instructions);
-                setHasReadAnswerer(summaryData.data.has_read_answerer_instructions);
-
+            const success = await fetchUserSummary(isMounted);
+            if (success && isMounted) {
                 await fetchSample();
-            } catch (e) {
-                console.error(e);
             }
         };
 
         load();
         return () => { isMounted = false; };
-    }, [loginId, password, navigate, setLoginId, setPassword, setHasConsented]);
+    }, [loginId, password, navigate, fetchUserSummary]);
 
     const handleSubmit = async (response_data: any) => {
         const apiRes = await fetch('/api/v1/task/response', {
@@ -156,6 +171,7 @@ function SampleWrapper() {
             throw new Error(errData.detail?.message || 'Error submitting response.');
         }
 
+        await fetchUserSummary();
         await fetchSample();
     };
 
@@ -217,6 +233,9 @@ function SampleWrapper() {
                 onTourComplete={async () => { await markInstructionsRead('question_asker'); }}
                 handleLogout={handleLogout}
                 onSubmit={async () => { /* no-op during tutorial */ }}
+                responsesCompleted={responsesCompleted}
+                maxResponsesAllowed={maxResponsesAllowed}
+                currentPhase={currentPhase}
             />
         )
     }
@@ -235,6 +254,9 @@ function SampleWrapper() {
                 onTourComplete={async () => { await markInstructionsRead('question_answerer'); }}
                 handleLogout={handleLogout}
                 onSubmit={async () => { /* no-op during tutorial */ }}
+                responsesCompleted={responsesCompleted}
+                maxResponsesAllowed={maxResponsesAllowed}
+                currentPhase={currentPhase}
             />
         )
     }
@@ -250,6 +272,9 @@ function SampleWrapper() {
             password={password}
             handleLogout={handleLogout}
             onSubmit={handleSubmit}
+            responsesCompleted={responsesCompleted}
+            maxResponsesAllowed={maxResponsesAllowed}
+            currentPhase={currentPhase}
         />
     )
 }
@@ -263,10 +288,13 @@ export type SampleProps = SampleData & {
     isTutorial?: boolean,
     onTourComplete?: () => Promise<void>,
     handleLogout: () => void,
-    onSubmit: (responseData: any) => Promise<void>
+    onSubmit: (responseData: any) => Promise<void>,
+    responsesCompleted: number,
+    maxResponsesAllowed: number,
+    currentPhase: number
 };
 
-export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimodal_input, ambiguous_question, intended_question, dialog_history, isValidated, hasReadAsker, hasReadAnswerer, loginId: _loginId, password: _password, onTourComplete, handleLogout, onSubmit }: SampleProps) {
+export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimodal_input, ambiguous_question, intended_question, dialog_history, isValidated, hasReadAsker, hasReadAnswerer, loginId: _loginId, password: _password, onTourComplete, handleLogout, onSubmit, responsesCompleted, maxResponsesAllowed, currentPhase }: SampleProps) {
     const [ratings, setRatings] = useState<Record<string, number>>({});
     const [currentGuess, setCurrentGuess] = useState("");
     const [confidenceScore, setConfidenceScore] = useState<number | null>(null);
@@ -696,7 +724,10 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
                             )
                         }
                     </Box>
-                    <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                    <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="body2" color="text.secondary">
+                            Samples Submitted: {responsesCompleted} {currentPhase === 2 ? `/ ${maxResponsesAllowed}` : ''}
+                        </Typography>
                         <Button
                             id="submit-button"
                             variant="contained"

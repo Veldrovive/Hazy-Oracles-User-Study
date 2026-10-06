@@ -17,6 +17,6 @@ echo "Mode: Semi-production (low volume)"
 # - Enable proxy headers to parse X-Forwarded-* headers properly when behind a proxy
 uv run uvicorn hazy_oracles_user_study.server:app \
     --host 0.0.0.0 \
-    --port 8000 \
+    --port 8088 \
     --workers 1 \
     --proxy-headers

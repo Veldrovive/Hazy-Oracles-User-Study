@@ -98,7 +98,7 @@ export const steps: Tour[] = [
       },
       {
         title: "Answer the Question",
-        content: "Now you use the hidden knowledge from the intended question to answer the question from the previous message. You should try to give as little information as possible away while still answering the question truthfully.",
+        content: "Now you use the hidden knowledge from the intended question to answer the question from the previous message. You should try to give as little information as possible away while still answering the question truthfully. Answer naturally as you would, as if you were just having this conversation.",
         selector: "#chat-input",
         side: 'top',
         showControls: true

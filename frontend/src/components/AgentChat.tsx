@@ -79,10 +79,10 @@ export function AgentChat({ imageSrc, imageSide, initialMessages, onSend, firstR
                                     >
                                         {msg.is_flagged && (
                                             <Message.CustomContent>
-                                                <div style={{ border: '2px solid red', padding: '8px', borderRadius: '4px', backgroundColor: '#ffebee' }}>
-                                                    <div style={{ color: 'black' }}>{msg.message}</div>
-                                                    <div style={{ color: 'red', fontSize: '0.85em', marginTop: '4px', fontWeight: 'bold' }}>
-                                                        ⚠️ AI Flagged: {msg.flagged_reason}
+                                                <div style={{ color: 'black' }}>{msg.message}</div>
+                                                <div style={{ border: '2px solid red', padding: '8px', marginTop: '4px', borderRadius: '4px', backgroundColor: '#ffebee' }}>
+                                                    <div style={{ color: 'red', fontSize: '0.85em', fontWeight: 'bold' }}>
+                                                        ⚠️ Flagged: {msg.flagged_reason}
                                                     </div>
                                                 </div>
                                             </Message.CustomContent>
