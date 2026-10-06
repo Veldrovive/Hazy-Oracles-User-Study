@@ -72,6 +72,12 @@ function Login() {
                 });
                 if (summaryRes.ok) {
                     const summaryData = await summaryRes.json();
+                    if (summaryData.data.has_ended_participation) {
+                        setCurrentError("You have chosen to end your participation in the study.");
+                        setSavedLoginId('');
+                        setSavedPassword('');
+                        return;
+                    }
                     if (summaryData.data.has_consented) {
                         setHasCompletedConsent(true);
                         navigate('/sample');

@@ -190,6 +190,7 @@ async def get_user_summary(request: UserSummaryRequest, session: Session = Depen
             responses_completed=user.num_responses_given,
             max_responses_allowed=max_responses_allowed,
             is_active=not criteria.is_excluded,
+            has_ended_participation=criteria.has_ended_participation,
 
             has_logged_in=user.has_logged_in,
             has_consented=user.has_consented,
@@ -275,6 +276,32 @@ async def update_read_answerer_instructions(request: UserStatusUpdateRequest, se
     session.commit()
     
     return SuccessResponse(message="User answerer instructions status updated successfully.")
+
+@app.post(
+    "/api/v1/user/end_participation",
+    response_model=SuccessResponse,
+    responses={
+        401: {"model": ErrorResponse, "description": "Inactive login or invalid credentials."}
+    }
+)
+async def update_user_end_participation(request: UserStatusUpdateRequest, session: Session = Depends(db_manager.get_session)):
+    """
+    Updates the has_ended_participation flag to True for the logged in user.
+    """
+    stmt = select(User).where(User.login_id == request.login_id, User.password == request.password)
+    user = session.exec(stmt).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorResponse(status="error", message="Invalid login or password.").model_dump()
+        )
+    
+    user.has_ended_participation = True
+    session.add(user)
+    session.commit()
+    
+    return SuccessResponse(message="User participation ended successfully.")
 
 @app.get(
     "/api/v1/user/login",

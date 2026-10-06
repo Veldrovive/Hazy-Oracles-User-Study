@@ -40,6 +40,7 @@ class UserSummaryData(BaseModel):
     responses_completed: int
     max_responses_allowed: int
     is_active: bool
+    has_ended_participation: bool
 
     has_logged_in: bool
     has_consented: bool

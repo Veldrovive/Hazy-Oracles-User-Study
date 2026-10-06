@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { Box, CircularProgress, Alert, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Tooltip, IconButton, ToggleButton, ToggleButtonGroup, Drawer, List, ListItem, ListItemButton, ListItemText, ListItemIcon } from '@mui/material';
+import { Box, CircularProgress, Alert, Typography, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Tooltip, IconButton, ToggleButton, ToggleButtonGroup, Drawer, List, ListItem, ListItemButton, ListItemText, ListItemIcon } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
@@ -8,6 +8,7 @@ import SentimentSatisfiedIcon from '@mui/icons-material/SentimentSatisfied';
 import SentimentVerySatisfiedIcon from '@mui/icons-material/SentimentVerySatisfied';
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { TaskInstructions } from './components/TaskInstructions';
 import { TargetQuestion } from './components/TargetQuestion';
 import { RatingForm } from './components/RatingForm';
@@ -118,6 +119,15 @@ function SampleWrapper() {
             }
 
             const summaryData = await summaryRes.json();
+            if (summaryData.data.has_ended_participation) {
+                if (isMounted) {
+                    setLoginId('');
+                    setPassword('');
+                    setHasConsented(false);
+                    navigate('/?message=' + encodeURIComponent('Your participation has ended. Thank you!'));
+                }
+                return false;
+            }
             if (!summaryData.data.has_consented) {
                 if (isMounted) navigate('/consent');
                 return false;
@@ -201,6 +211,13 @@ function SampleWrapper() {
         navigate('/');
     };
 
+    const handleEndParticipation = () => {
+        setLoginId('');
+        setPassword('');
+        setHasConsented(false);
+        navigate('/?message=' + encodeURIComponent('Your participation has ended. Thank you!'));
+    };
+
     const markInstructionsRead = async (role: 'question_asker' | 'question_answerer') => {
         const endpoint = role === 'question_asker' ? '/api/v1/user/read_asker_instructions' : '/api/v1/user/read_answerer_instructions';
         try {
@@ -232,6 +249,7 @@ function SampleWrapper() {
                 isTutorial={true}
                 onTourComplete={async () => { await markInstructionsRead('question_asker'); }}
                 handleLogout={handleLogout}
+                onEndParticipation={handleEndParticipation}
                 onSubmit={async () => { /* no-op during tutorial */ }}
                 responsesCompleted={responsesCompleted}
                 maxResponsesAllowed={maxResponsesAllowed}
@@ -253,6 +271,7 @@ function SampleWrapper() {
                 isTutorial={true}
                 onTourComplete={async () => { await markInstructionsRead('question_answerer'); }}
                 handleLogout={handleLogout}
+                onEndParticipation={handleEndParticipation}
                 onSubmit={async () => { /* no-op during tutorial */ }}
                 responsesCompleted={responsesCompleted}
                 maxResponsesAllowed={maxResponsesAllowed}
@@ -271,6 +290,7 @@ function SampleWrapper() {
             loginId={loginId}
             password={password}
             handleLogout={handleLogout}
+            onEndParticipation={handleEndParticipation}
             onSubmit={handleSubmit}
             responsesCompleted={responsesCompleted}
             maxResponsesAllowed={maxResponsesAllowed}
@@ -288,13 +308,14 @@ export type SampleProps = SampleData & {
     isTutorial?: boolean,
     onTourComplete?: () => Promise<void>,
     handleLogout: () => void,
+    onEndParticipation?: () => void,
     onSubmit: (responseData: any) => Promise<void>,
     responsesCompleted: number,
     maxResponsesAllowed: number,
     currentPhase: number
 };
 
-export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimodal_input, ambiguous_question, intended_question, dialog_history, isValidated, hasReadAsker, hasReadAnswerer, loginId: _loginId, password: _password, onTourComplete, handleLogout, onSubmit, responsesCompleted, maxResponsesAllowed, currentPhase }: SampleProps) {
+export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimodal_input, ambiguous_question, intended_question, dialog_history, isValidated, hasReadAsker, hasReadAnswerer, loginId, password, onTourComplete, handleLogout, onEndParticipation, onSubmit, responsesCompleted, maxResponsesAllowed, currentPhase }: SampleProps) {
     const [ratings, setRatings] = useState<Record<string, number>>({});
     const [currentGuess, setCurrentGuess] = useState("");
     const [confidenceScore, setConfidenceScore] = useState<number | null>(null);
@@ -333,6 +354,22 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const [showInstructionsModal, setShowInstructionsModal] = useState(false);
+    const [showEndParticipationDialog, setShowEndParticipationDialog] = useState(false);
+
+    const confirmEndParticipation = async () => {
+        try {
+            await fetch('/api/v1/user/end_participation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login_id: loginId, password: password })
+            });
+            if (onEndParticipation) {
+                onEndParticipation();
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     useEffect(() => {
         if (isTutorial) {
@@ -551,9 +588,34 @@ export function Sample({ sample_id: _sample_id, task_role, isTutorial, multimoda
                                 <ListItemText primary="Log Out" sx={{ color: 'error.main' }} />
                             </ListItemButton>
                         </ListItem>
+                        <ListItem disablePadding>
+                            <ListItemButton onClick={() => { setIsSidebarOpen(false); setShowEndParticipationDialog(true); }}>
+                                <ListItemIcon>
+                                    <CancelIcon color="error" />
+                                </ListItemIcon>
+                                <ListItemText primary="End Participation" sx={{ color: 'error.main' }} />
+                            </ListItemButton>
+                        </ListItem>
                     </List>
                 </Box>
             </Drawer>
+
+            <Dialog open={showEndParticipationDialog} onClose={() => setShowEndParticipationDialog(false)}>
+                <DialogTitle>End Participation</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to end your participation in this study? You will not be able to log back in or complete any more samples.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setShowEndParticipationDialog(false)} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={confirmEndParticipation} color="error" variant="contained">
+                        End Participation
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <Box sx={{
                 width: '100vw',

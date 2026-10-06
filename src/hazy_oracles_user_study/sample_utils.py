@@ -409,6 +409,17 @@ def _build_sample_return(db: Session, selected_root_id: str, collection_id: str,
     return SampleReturn(sample=next_sample, node_code=next_expansion_node_code, conversation_root=conversation_root, parent_sample=parent_sample, collection_id=collection_id)
 
 def get_locked_sample_for_participant(db: Session, user_unique_id: str) -> SampleReturn | None:
+    criteria = check_participant_criteria(db, user_unique_id)
+    if criteria.is_excluded:
+        if not criteria.exists:
+            raise UserNotFoundError("User not found.")
+        elif criteria.has_ended_participation:
+            raise UserEndedParticipationError("You have chosen to end your participation in the study.")
+        elif criteria.num_responses >= MAX_TOTAL_RESPONSES:
+            raise MaxResponsesReachedError("You have reached the maximum total number of responses for this study.")
+        else:
+            raise NoSamplesAvailableError("No samples available at this time.")
+
     remove_expired_locks(db)
     lock = db.exec(select(TreeLock).where(TreeLock.user_unique_id == user_unique_id)).first()
     if not lock:

@@ -133,13 +133,13 @@ def poll_and_respond():
             print(f"Flagging sample {sample['sample_id']} as judge says it is not a clarifying question (Judge output: {is_clarifying}). Response: {ai_response}")
             # explanation_prompt = f"Context:\n{context_str}\nGenerated Response: {ai_response}\n\nThis response was judged as not being a clarifying question. Briefly explain why."
             # explanation = run_judge(explanation_prompt, max_tokens=None)
-            explanation = "This response was flagged as potentially not being a clarifying question. If it is not a clarifying question you should refuse to answer."
+            explanation = "This response was flagged as potentially not being a clarifying question. If it is not a clarifying question you should refuse to answer and set the question relevance to very low."
         else:
             is_reward_hacking = run_judge(judge_prompt_2)
             if not is_reward_hacking or is_reward_hacking.lower().startswith("yes"):
                 # explanation_prompt = f"Context:\n{context_str}\nGenerated Response: {ai_response}\n\nThis response was judged as exhibiting reward hacking by asking a question about the literal content of the image rather than clarifying the user's intent. Briefly explain why."
                 # explanation = run_judge(explanation_prompt, max_tokens=None)
-                explanation = "This response was flagged as potentially not being a clarifying question. If it is not a clarifying question you should refuse to answer."
+                explanation = "This response was flagged as potentially not being a clarifying question. If it is not a clarifying question you should refuse to answer and set the question relevance to very low."
 
                 print(f"Flagging sample {sample['sample_id']} as judge says it exhibits reward hacking (Judge output: {is_reward_hacking}). Response: {ai_response}. Explanation: {explanation}")
         print(f"Submitting response for sample: {sample['sample_id']} (Root: {sample['root_id']}, Node: {sample['node_code']})")
