@@ -31,7 +31,8 @@ RUN uv sync --frozen --no-install-project --no-dev
 
 # Copy the backend source code
 COPY src/ ./src/
-COPY data/ ./data/
+# We now do this through a volume
+# COPY data/ ./data/
 
 # Install the project itself
 RUN uv sync --frozen --no-dev

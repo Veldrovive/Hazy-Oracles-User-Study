@@ -66,6 +66,13 @@ async def lifespan(app: FastAPI):
     
     with Session(db_manager.engine) as session:
         print(f"Total root dirs: {len(list(ROOTS_PATH.iterdir()))}")
+        
+        excluded_images_path = os.path.join("data", "excluded_images.json")
+        excluded_images = {}
+        if os.path.exists(excluded_images_path):
+            with open(excluded_images_path, "r") as f:
+                excluded_images = json.load(f)
+
         progress = tqdm(ROOTS_PATH.iterdir(), desc="Loading conversation roots")
         for roots_dir in progress:
             if not roots_dir.is_dir():
@@ -75,10 +82,17 @@ async def lifespan(app: FastAPI):
             if not roots_file.exists():
                 continue
 
+            collection_name = roots_dir.name
+            excluded_for_collection = excluded_images.get(collection_name, [])
+
             roots_data = json.load(roots_file.open("r"))
             for root_data in roots_data["roots"]:
                 root = ConversationRoot.model_validate(root_data)
                 
+                if root.original_dataset_sample_id in excluded_for_collection:
+                    print(f"Excluding root {root.root_id} ({root.original_dataset_sample_id}) from collection {collection_name}")
+                    continue
+
                 # Check if root already exists
                 existing_root = session.get(ConversationRoot, root.root_id)
                 if not existing_root:
