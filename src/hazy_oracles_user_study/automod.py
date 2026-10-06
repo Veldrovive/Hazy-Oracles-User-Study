@@ -1,15 +1,20 @@
 import re
 import unidecode
+import requests
 from typing import NamedTuple, Optional, Dict, Literal
 from better_profanity import profanity
 from detoxify import Detoxify
 from pygarble import EnsembleDetector
 from hazy_oracles_user_study.definitions import AUTOMOD_TOXICITY_THRESHOLD, AUTOMOD_SEVERE_TOXICITY_THRESHOLD
 
+JUDGE_VLLM_URL = "http://localhost:9098"
+JUDGE_MODEL_KEY = "Qwen/Qwen3.6-35B-A3B-FP8"
+JUDGE_PROMPT_TEMPLATE = "Text: {raw_text}\n\nIs the text above a real, coherent sentence written in good faith? It should not be a random collection of words or gibberish trying to trick a markov chain gibberish detector. Answer only with 'Yes' if it is a real, coherent sentence, or 'No' if it is random words, gibberish, or in bad faith."
+
 
 class ModerationResult(NamedTuple):
     original_text: str
-    action: Literal["pass", "reject_gibberish", "reject_profanity", "reject_toxic"]
+    action: Literal["pass", "reject_gibberish", "reject_profanity", "reject_toxic", "reject_bad_faith"]
     fast_catch_triggered: bool
     detoxify_scores: Optional[Dict[str, float]]
     normalized_text_used: Optional[str]
@@ -123,6 +128,25 @@ class ContentModerator:
         if detoxify_scores["toxicity"] > self.toxicity_threshold or detoxify_scores["severe_toxicity"] > self.severe_toxicity_threshold:
              action = "reject_toxic"
 
+        # ==========================================
+        # STEP 3: Judge LLM Bad Faith Check
+        # ==========================================
+        if action == "pass":
+            prompt_text = JUDGE_PROMPT_TEMPLATE.format(raw_text=raw_text)
+            payload = {
+                "model": JUDGE_MODEL_KEY,
+                "messages": [{"role": "user", "content": prompt_text}],
+                "temperature": 0.0
+            }
+            try:
+                res = requests.post(f"{JUDGE_VLLM_URL}/v1/chat/completions", json=payload, timeout=10)
+                res.raise_for_status()
+                judge_response = res.json()['choices'][0]['message']['content'].strip()
+                if not judge_response.lower().startswith("yes"):
+                    action = "reject_bad_faith"
+            except Exception as e:
+                print(f"Error querying Judge VLLM in automod: {e}")
+
         return ModerationResult(
             original_text=raw_text,
             action=action,
@@ -143,6 +167,9 @@ if __name__ == "__main__":
         "I will find where you live and hurt you",  # Tests Detoxify (no profanity, but highly toxic/threatening)
         "You are a 𝒷𝒾𝓉𝒸𝒽",                            # Tests Unicode font evasion
         "gghbghbghb",
+        "MEOW MEWO MWO EMEOW MEOW",
+        "Much want such no bet",
+        "Are you referring to a cat or some other animal with similar sounds?"
     ]
 
     for test in test_cases:
