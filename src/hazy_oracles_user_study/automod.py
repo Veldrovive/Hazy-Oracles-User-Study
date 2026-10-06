@@ -65,7 +65,7 @@ class ContentModerator:
         
         return normalized_text.lower()
 
-    def evaluate_text(self, raw_text: str, fast_fail: bool = False) -> ModerationResult:
+    def evaluate_text(self, raw_text: str, fast_fail: bool = False, conversation_context: Optional[str] = None) -> ModerationResult:
         """
         Runs the two-step moderation pipeline.
         
@@ -132,16 +132,22 @@ class ContentModerator:
         # STEP 3: Judge LLM Bad Faith Check
         # ==========================================
         if action == "pass":
-            prompt_text = JUDGE_PROMPT_TEMPLATE.format(raw_text=raw_text)
+            if conversation_context:
+                prompt_text = f"Conversation History:\n{conversation_context}\n\nNew Message: {raw_text}\n\nGiven the conversation history, is the new message a real, coherent sentence written in good faith? It should not be a random collection of words or gibberish trying to trick a markov chain gibberish detector. Answer only with 'Yes' if it is a real, coherent sentence, or 'No' if it is random words, gibberish, or in bad faith."
+            else:
+                prompt_text = JUDGE_PROMPT_TEMPLATE.format(raw_text=raw_text)
+            
             payload = {
                 "model": JUDGE_MODEL_KEY,
                 "messages": [{"role": "user", "content": prompt_text}],
                 "temperature": 0.0
             }
             try:
+                print(f"Querying Judge VLLM: {payload}")
                 res = requests.post(f"{JUDGE_VLLM_URL}/v1/chat/completions", json=payload, timeout=10)
                 res.raise_for_status()
                 judge_response = res.json()['choices'][0]['message']['content'].strip()
+                print(f"Judge answer: {judge_response}")
                 if not judge_response.lower().startswith("yes"):
                     action = "reject_bad_faith"
             except Exception as e:

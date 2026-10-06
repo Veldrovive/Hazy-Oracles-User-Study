@@ -586,7 +586,43 @@ def process_returned_sample(db: Session, response: TaskResponseRequest) -> bool:
     else:
         raise ValueError(f"Invalid response type: {response_data.response_type}")
 
-    moderation_report = moderator.evaluate_text(response_content, fast_fail=False)
+    ancestor_samples: list[SampleResponse] = []
+    
+    history_lines = []
+    conversation_root = db.get(ConversationRoot, sent_sample.root_id)
+    if conversation_root and conversation_root.ambiguous_question:
+        history_lines.append(f"Initial Question: {conversation_root.ambiguous_question}")
+        
+    if len(sent_sample_node_code) > 1:
+        parent_node_code = sent_sample_node_code[:-1]
+        
+        base_query = select(SampleResponse).where(
+            SampleResponse.root_id == sent_sample.root_id,
+            SampleResponse.collection_id == collection_id,
+            SampleResponse.node_code == parent_node_code,
+            SampleResponse.moderation_status == MODERATION_ACTION.CLEARED
+        ).cte(name="ancestor_samples", recursive=True)
+
+        recursive_query = select(SampleResponse).join(
+            base_query, SampleResponse.sample_id == base_query.c.parent_sample_id
+        )
+
+        ancestors_cte = base_query.union_all(recursive_query)
+        ancestor_alias = aliased(SampleResponse, ancestors_cte)
+        
+        statement = select(ancestor_alias)
+        ancestor_samples = list(db.exec(statement).all())
+        ancestor_samples.sort(key=lambda s: len(s.node_code))
+        
+        for s in ancestor_samples:
+            if s.sample_type == SAMPLE_TYPE.ASKER and s.next_question:
+                history_lines.append(f"Question Asker: {s.next_question}")
+            elif s.sample_type == SAMPLE_TYPE.ANSWERER and s.answer:
+                history_lines.append(f"Question Answerer: {s.answer}")
+                
+    conversation_context = "\n".join(history_lines)
+
+    moderation_report = moderator.evaluate_text(response_content, fast_fail=False, conversation_context=conversation_context)
     if moderation_report.action != "pass":
         returned_sample.moderation_status = MODERATION_ACTION.PLACED_ON_HOLD
         moderation_event = ModerationEvent(
