@@ -8,7 +8,7 @@ services:
     environment:
       - API_KEY=${API_KEY}
       - ROOTS_PATH=./data/conversation_roots
-      - DATABASE_URL=sqlite:///./database.db
+      - DATABASE_URL=sqlite:///./data/database.db
       - LOCK_TIMEOUT_MINUTES=2
       - PHASE_1_QUALIFICATION_NUM_RESPONSES=10
       - MAX_AUTOMOD_FLAGS=2
@@ -18,6 +18,5 @@ services:
       - AUTOMOD_TOXICITY_THRESHOLD=0.5
       - AUTOMOD_SEVERE_TOXICITY_THRESHOLD=0.25
     volumes:
-      - ./database.db:/app/database.db
       - ./data:/app/data
     restart: unless-stopped
