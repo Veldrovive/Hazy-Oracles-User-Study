@@ -3,6 +3,7 @@
 /data
 *.db
 .DS_store
+/data.zip
 
 # Python-generated files
 __pycache__/
